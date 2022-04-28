@@ -1,9 +1,12 @@
+import { Hookable, HookCallback } from "hookable";
 import { createContext } from "unctx";
 
 import type { SliceMachineConfig } from "./types";
-import { hook, removeHook, callHook } from "./sliceMachineHooks";
+import { SliceMachineHooks, SafeSliceMachineHooks } from "./sliceMachineHooks";
 
-export type SliceMachineContext = {
+export type SliceMachineContext<
+	THooks extends Record<string, HookCallback> = SafeSliceMachineHooks,
+> = {
 	dir: {
 		/**
 		 * Absolute path to project root
@@ -35,20 +38,35 @@ export type SliceMachineContext = {
 
 	config: SliceMachineConfig;
 
-	hook: typeof hook;
+	hook: Hookable<THooks>["hook"];
 
-	removeHook: typeof removeHook;
+	removeHook: Hookable<THooks>["removeHook"];
 
-	callHook: typeof callHook;
+	callHook: Hookable<SliceMachineHooks>["callHook"];
 };
 
-export const sliceMachineContext = createContext<SliceMachineContext>();
+type SliceMachineInternalContext = Omit<
+	SliceMachineContext,
+	"hook" | "removeHook"
+> & {
+	/**
+	 * @internal
+	 */
+	hook: SliceMachineContext["hook"];
+
+	/**
+	 * @internal
+	 */
+	removeHook: SliceMachineContext["removeHook"];
+};
+
+export const sliceMachineContext = createContext<SliceMachineInternalContext>();
 
 /**
  * This allow Slice Machine context described above to be accessible easily
  * anywhere in plugins.
  */
-export const useSliceMachine = (): SliceMachineContext => {
+export const useSliceMachine = (): SliceMachineInternalContext => {
 	const context = sliceMachineContext.use();
 
 	if (!context) {

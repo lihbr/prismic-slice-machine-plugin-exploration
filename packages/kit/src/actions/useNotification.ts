@@ -1,5 +1,5 @@
+import { useSliceMachine } from "../sliceMachineContext";
 import type { SliceMachineHooks } from "../sliceMachineHooks";
-import { callHook, useHook } from "./useHook";
 
 /**
  * This file is mainly showcasing a pattern that the plugin kit could use to
@@ -13,7 +13,7 @@ import { callHook, useHook } from "./useHook";
 export const notify = (
 	...args: Parameters<SliceMachineHooks["ui:notification"]>
 ) => {
-	return callHook("ui:notification", ...args);
+	return useSliceMachine().callHook("ui:notification", ...args);
 };
 
 /**
@@ -22,5 +22,5 @@ export const notify = (
 export const useNotification = (
 	handler: SliceMachineHooks["ui:notification"],
 ) => {
-	return useHook("ui:notification", handler);
+	return useSliceMachine().hook("ui:notification", handler);
 };

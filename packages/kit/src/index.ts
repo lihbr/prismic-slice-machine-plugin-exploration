@@ -33,10 +33,10 @@ export {
 	useNotification,
 } from "./actions";
 
+export { loadPlugin, usePlugin } from "./internal";
+
 /**
  * TODO:
  *
  * - Read hooks need to return value
- * - TypeScript & Runtime validation for hooks depending on if the plugin is an
- *   adapter or not
  */

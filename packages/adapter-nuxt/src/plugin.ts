@@ -6,4 +6,18 @@ export default defineSliceMachineAdapter({
 	meta: {
 		name: pkgName,
 	},
+	hooks: {
+		"slice:create": (todo, options) => {
+			/* ... */
+		},
+		"slice:update": () => {
+			/* ... */
+		},
+		"slice:delete": () => {
+			/* ... */
+		},
+		"slice:read": () => {
+			/* ... */
+		},
+	},
 });

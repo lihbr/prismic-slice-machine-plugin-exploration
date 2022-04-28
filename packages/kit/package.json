@@ -40,6 +40,7 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
+		"defu": "6.0.0",
 		"detect-indent": "^7.0.0",
 		"hookable": "^5.1.1",
 		"prettier": "^2.6.2",

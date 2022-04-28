@@ -1,8 +1,8 @@
 import type { SliceMachineContext } from "./sliceMachineContext";
 import type { SliceMachinePlugin } from "./sliceMachinePlugin";
-import type { SliceMachineHooks } from "./sliceMachineHooks";
+import type { SliceMachineAdapterHooks } from "./sliceMachineHooks";
 
-// TODO: We should find a way to enforce featureful adapters with TypeScript
+// TODO: We should find a way to enforce featureful adapters with TypeScript :thinking:
 
 /**
  * Slice Machine Adapter definition.
@@ -16,11 +16,11 @@ export type SliceMachineAdapter<
 	 */
 	_type: "adapter";
 
-	hooks?: Partial<SliceMachineHooks>;
+	hooks?: Partial<SliceMachineAdapterHooks<TOptions>>;
 
 	setup?: (
 		mergedOptions: TOptions,
-		sliceMachine: SliceMachineContext,
+		sliceMachine: SliceMachineContext<SliceMachineAdapterHooks<TOptions>>,
 	) => void | Promise<void>;
 } & Omit<SliceMachinePlugin<TOptions>, "_type" | "hooks" | "setup">;
 

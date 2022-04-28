@@ -1,6 +1,5 @@
-import { Hookable } from "hookable";
 import { SliceMachineContext } from "./sliceMachineContext";
-import type { AdapterOnlyHooks, SliceMachineHooks } from "./sliceMachineHooks";
+import type { SliceMachinePluginHooks } from "./sliceMachineHooks";
 import type { SliceMachineConfig } from "./types";
 
 /**
@@ -30,27 +29,14 @@ export type SliceMachinePlugin<
 	/**
 	 * Sugar for registering hooks.
 	 */
-	hooks?: Partial<{
-		[key in Exclude<
-			keyof SliceMachineHooks,
-			AdapterOnlyHooks
-		>]: SliceMachineHooks[key];
-	}>;
+	hooks?: Partial<SliceMachinePluginHooks<TOptions>>;
 
 	/**
 	 * Plugin setup.
 	 */
 	setup?: (
 		mergedOptions: TOptions,
-		sliceMachine: {
-			hook: Hookable<Omit<SliceMachineHooks, AdapterOnlyHooks>>["hook"];
-
-			removeHook: Hookable<
-				Omit<SliceMachineHooks, AdapterOnlyHooks>
-			>["removeHook"];
-
-			callHook: Hookable<Omit<SliceMachineHooks, AdapterOnlyHooks>>["callHook"];
-		} & Omit<SliceMachineContext, "hook" | "removeHook" | "callHook">,
+		sliceMachine: SliceMachineContext<SliceMachinePluginHooks<TOptions>>,
 	) => void | Promise<void>;
 };
 
