@@ -40,18 +40,19 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
-		"defu": "6.0.0",
-		"detect-indent": "^7.0.0",
-		"hookable": "^5.1.1",
-		"prettier": "^2.6.2",
-		"unctx": "^1.1.4"
+		"defu": "^6.0.0",
+		"memoizee": "^0.4.15",
+		"micromatch": "^4.0.5",
+		"prettier": "^2.6.2"
 	},
 	"devDependencies": {
+		"@types/memoizee": "^0.4.7",
+		"@types/micromatch": "^4.0.2",
 		"@types/prettier": "^2.6.0",
 		"c8": "^7.11.2",
 		"siroc": "^0.16.0",
 		"standard-version": "^9.3.2",
-		"typescript": "^4.6.3",
+		"typescript": "^4.6.4",
 		"vitest": "^0.10.0"
 	},
 	"engines": {

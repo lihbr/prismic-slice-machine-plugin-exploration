@@ -1,5 +1,4 @@
 import { SliceMachineConfigPluginRegistration } from "../types";
-import { SliceMachineAdapter } from "../sliceMachineAdapter";
 import { SliceMachinePlugin } from "../sliceMachinePlugin";
 import { usePlugin } from "./usePlugin";
 
@@ -9,9 +8,7 @@ import { usePlugin } from "./usePlugin";
 export const loadPlugin = async (
 	pluginRegistration: SliceMachineConfigPluginRegistration,
 	deferUsage = false,
-): Promise<
-	[SliceMachinePlugin | SliceMachineAdapter, Record<string, unknown>]
-> => {
+): Promise<[SliceMachinePlugin, Record<string, unknown>]> => {
 	const { resolve, options = {} } =
 		typeof pluginRegistration === "string"
 			? { resolve: pluginRegistration }
