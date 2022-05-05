@@ -2,7 +2,7 @@ import micromatch from "micromatch";
 import memoizee from "memoizee";
 
 const canHook = memoizee(micromatch.isMatch);
-const canCallHook = canHook;
+const canCall = canHook;
 const mockFunction = () => {
 	/* ... */
 };
@@ -188,7 +188,7 @@ export class HookSystem<
 				);
 			},
 			callHook: (name, ...args) => {
-				if (!canCallHook(name, group.canCall)) {
+				if (!canCall(name, group.canCall)) {
 					return new Promise((resolve) => resolve(undefined));
 				}
 
