@@ -1,11 +1,11 @@
-import { createHooks } from "hookable";
+import { HookSystem } from "./lib";
 
 type TODO = unknown;
 
 /**
  * Possible hooks emitted by Slice Machine.
  */
-export type SliceMachineHooks<TOptions = void> = {
+export type SliceMachineHooks<TOptions = never> = {
 	// Slices
 	"slice:create": (
 		todoPayload: TODO,
@@ -65,30 +65,19 @@ export type SliceMachineHooks<TOptions = void> = {
 	) => void | Promise<void>;
 };
 
-export const adapterOnlyHooks = [
-	"slice:read",
-	"custom-type:read",
-	"library:read",
-	"snippet:read",
-	"slice-simulator:setup:read",
-] as const;
-export type AdapterOnlyHooks = typeof adapterOnlyHooks[number];
-
-export type SliceMachinePluginHooks<TOptions = void> = Omit<
-	SliceMachineHooks<TOptions>,
-	AdapterOnlyHooks
->;
-
-export type SliceMachineAdapterHooks<TOptions = void> =
-	SliceMachineHooks<TOptions>;
-
-export type SafeSliceMachineHooks<TOptions = void> = Pick<
-	SliceMachineHooks<TOptions>,
-	Extract<keyof SliceMachinePluginHooks, keyof SliceMachineAdapterHooks>
->;
-
-const hooks = createHooks<SliceMachineHooks>();
-
-export const hook = hooks.hook;
-export const removeHook = hooks.removeHook;
-export const callHook = hooks.callHook;
+export const createSliceMachineHooks = () => {
+	return new HookSystem<SliceMachineHooks>({
+		sliceMachine: {
+			canHook: ["*"],
+			canCall: ["*"],
+		},
+		plugin: {
+			canHook: ["!*:read"],
+			canCall: ["*"],
+		},
+		adapter: {
+			canHook: ["*"],
+			canCall: ["*"],
+		},
+	});
+};
