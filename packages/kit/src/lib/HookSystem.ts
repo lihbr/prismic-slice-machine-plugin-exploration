@@ -1,32 +1,64 @@
 import micromatch from "micromatch";
 import memoizee from "memoizee";
 
-const canHook = memoizee(micromatch.isMatch);
-const canCall = canHook;
+const isAuthorized = memoizee(micromatch.isMatch);
 const mockFunction = () => {
 	/* ... */
 };
 
+/**
+ * Defines a hook handler.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Hook<TArgs extends any[] = any[], TReturn = any> = (
+	...args: TArgs
+) => Promise<TReturn> | TReturn;
+
+/**
+ * Defines a hook group for users to belong to.
+ */
+export type HookGroup = {
+	canHook: string[];
+	canCall: string[];
+};
+
+/**
+ * Extends hooks with extra args.
+ */
 type ExtendHooks<
 	THooks extends Record<string, Hook> = Record<string, Hook>,
 	TExtraArgs extends unknown[] = never[],
 	THookNames extends keyof THooks & string = keyof THooks & string,
 > = {
 	[K in THookNames]: (
-		...args: [...Parameters<THooks[K]>, ...TExtraArgs]
+		...args: [...args: Parameters<THooks[K]>, ...extraArgs: TExtraArgs]
 	) => ReturnType<THooks[K]>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Hook<TArgs extends any[] = any[], TReturn = any> = (
-	...args: TArgs
-) => Promise<TReturn> | TReturn;
-
-export type HookGroup = {
-	canHook: string[];
-	canCall: string[];
+/**
+ * Defines the return type of the {@link HookSystem.useHooks} functions.
+ */
+export type UseHooksReturnType<
+	THooks extends Record<string, Hook> = Record<string, Hook>,
+	TExtraArgs extends unknown[] = never[],
+	TGroupNames extends string = string,
+	THookNames extends keyof THooks & string = keyof THooks & string,
+> = {
+	hook: <TName extends THookNames>(
+		name: TName,
+		hook: ExtendHooks<THooks, TExtraArgs>[TName],
+	) => () => void;
+	unHook: HookSystem<
+		ExtendHooks<THooks, TExtraArgs>,
+		TGroupNames,
+		THookNames
+	>["unHook"];
+	callHook: HookSystem<THooks, TGroupNames, THookNames>["callHook"];
 };
 
+/**
+ * Represents a hook hooked to the system.
+ */
 type Hooked<THook extends Hook = Hook, TGroupID extends string = string> = {
 	groupID: TGroupID;
 	userID: string;
@@ -34,11 +66,17 @@ type Hooked<THook extends Hook = Hook, TGroupID extends string = string> = {
 	meta: Record<string, unknown>;
 };
 
+/**
+ * @internal
+ */
 export class HookSystem<
 	THooks extends Record<string, Hook> = Record<string, Hook>,
-	TGroups extends Record<string, HookGroup> = Record<string, HookGroup>,
+	TGroupNames extends string = string,
 	THookNames extends keyof THooks & string = keyof THooks & string,
-	TGroupNames extends keyof TGroups & string = keyof TGroups & string,
+	TGroups extends Record<TGroupNames, HookGroup> = Record<
+		TGroupNames,
+		HookGroup
+	>,
 > {
 	protected groups: TGroups;
 
@@ -50,7 +88,7 @@ export class HookSystem<
 		this.groups = groups;
 	}
 
-	protected getGroup(groupID: keyof TGroups): HookGroup {
+	protected getGroup(groupID: TGroupNames): HookGroup {
 		const group = this.groups[groupID];
 
 		if (!group) {
@@ -145,32 +183,19 @@ export class HookSystem<
 	 *
 	 * @returns `hook`, `unHook`, and `callHook` functions for the group.
 	 */
-	useHooks<
-		TExtraArgs extends unknown[] = never[],
-		TExtendedHooks extends ExtendHooks<THooks, TExtraArgs> = ExtendHooks<
-			THooks,
-			TExtraArgs
-		>,
-	>(
+	useHooks<TExtraArgs extends unknown[] = never[]>(
 		groupID: TGroupNames,
 		userID: string,
 		...extraArgs: TExtraArgs
-	): {
-		hook: <TName extends THookNames>(
-			name: TName,
-			hook: TExtendedHooks[TName],
-		) => () => void;
-		unHook: HookSystem<TExtendedHooks, TGroups, THookNames>["unHook"];
-		callHook: HookSystem<THooks, TGroups, THookNames>["callHook"];
-	} {
+	): UseHooksReturnType<THooks, TExtraArgs, TGroupNames, THookNames> {
 		const group = this.getGroup(groupID);
 
 		return {
 			hook: <TName extends THookNames>(
 				name: TName,
-				hook: TExtendedHooks[TName],
+				hook: ExtendHooks<THooks, TExtraArgs>[TName],
 			): (() => void) => {
-				if (!canHook(name, group.canHook)) {
+				if (!isAuthorized(name, group.canHook)) {
 					return mockFunction;
 				}
 
@@ -188,7 +213,7 @@ export class HookSystem<
 				);
 			},
 			callHook: (name, ...args) => {
-				if (!canCall(name, group.canCall)) {
+				if (!isAuthorized(name, group.canCall)) {
 					return new Promise((resolve) => resolve(undefined));
 				}
 

@@ -10,15 +10,17 @@ export type SliceMachineConfigPluginRegistration =
 
 /**
  * Slice Machine `sm.json` config.
- *
- * Note: we maybe should push for Slice Machine to use c12 or similar:
- * https://github.com/unjs/c12
  */
 export type SliceMachineConfig = {
 	_latest: string;
 	apiEndpoint: string;
 	localSliceSimulatorURL?: string;
 	libraries?: string[];
-	adapter?: SliceMachineConfigPluginRegistration;
+	adapter: SliceMachineConfigPluginRegistration;
 	plugins?: SliceMachineConfigPluginRegistration[];
+};
+
+export type SliceMachineProject = {
+	root: string;
+	config: SliceMachineConfig;
 };

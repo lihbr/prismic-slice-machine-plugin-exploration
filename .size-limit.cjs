@@ -7,4 +7,4 @@ module.exports = pkg.workspaces
 		return [pkg.module, pkg.main].filter(Boolean).map(file => `./${workspace}/${file}`);
 	})
 	.flat()
-	.map(path => ({ path }));
+	.map(path => ({ path, ignore: ["path", "util"] }));

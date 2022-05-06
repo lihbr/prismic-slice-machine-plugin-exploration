@@ -2,11 +2,23 @@ import { defineSliceMachinePlugin } from "@slicemachine/plugin-kit";
 
 import { name as pkgName } from "../package.json";
 
-export default defineSliceMachinePlugin({
+type NuxtPluginOptions = {
+	typescript: boolean;
+};
+
+export default defineSliceMachinePlugin<NuxtPluginOptions>({
 	meta: {
 		name: pkgName,
 	},
-	setup() {
+	setup({ hook }, { options }) {
+		// Just trying types...
+		if (options.typescript) {
+			hook("slice:create", (_data, { notify }, { options }) => {
+				if (options.typescript) {
+					notify("info", "Typescript is enabled");
+				}
+			});
+		}
 		/* ... */
 	},
 });
