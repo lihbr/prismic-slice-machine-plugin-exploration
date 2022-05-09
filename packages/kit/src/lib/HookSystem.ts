@@ -139,16 +139,14 @@ export class HookSystem<
 	protected async callHook<TName extends THookNames>(
 		name: TName,
 		...args: Parameters<THooks[TName]>
-	): Promise<Awaited<ReturnType<THooks[TName]>> | undefined> {
+	): Promise<Awaited<ReturnType<THooks[TName]>[]> | never[]> {
 		const hooks = this._hooks[name] ?? [];
 
 		const promises = hooks.map(
 			(hooked) => hooked.hook(...args) as ReturnType<THooks[TName]>,
 		);
 
-		const [result] = await Promise.all(promises);
-
-		return result;
+		return await Promise.all(promises);
 	}
 
 	/**
@@ -214,7 +212,7 @@ export class HookSystem<
 			},
 			callHook: (name, ...args) => {
 				if (!isAuthorized(name, group.canCall)) {
-					return new Promise((resolve) => resolve(undefined));
+					return new Promise((resolve) => resolve([]));
 				}
 
 				return this.callHook(name, ...args);

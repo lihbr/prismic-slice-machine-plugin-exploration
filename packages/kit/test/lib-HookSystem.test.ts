@@ -85,15 +85,15 @@ it("stops calling hook when unhooked", async () => {
 	expect(bar).toHaveBeenCalledTimes(2);
 });
 
-it("returns undefined when no hook", async () => {
+it("returns an empty when no hook", async () => {
 	const { callHook } = new HookSystem({ root }).useHooks("root", "root");
 
 	const result = await callHook("hook1");
 
-	expect(result).toBeUndefined();
+	expect(result).toStrictEqual([]);
 });
 
-it("returns first hook return value", async () => {
+it("returns hook return value in order", async () => {
 	const { hook, callHook } = new HookSystem({ root }).useHooks("root", "root");
 
 	const foo = vi.fn(() => "foo");
@@ -104,7 +104,7 @@ it("returns first hook return value", async () => {
 
 	const result = await callHook("hook1");
 
-	expect(result).toBe("foo");
+	expect(result).toStrictEqual(["foo", "bar"]);
 });
 
 it("doesn't allow unauthorized users to hook", async () => {
