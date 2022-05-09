@@ -53,10 +53,10 @@ export type SliceMachineHooks = {
 	) => void | Promise<void>;
 
 	// Actions?
-	[SLICE_MACHINE_HOOKS.uiNotification]: (
-		type: "info" | "warn" | "error",
-		message: string,
-	) => void | Promise<void>;
+	[SLICE_MACHINE_HOOKS.uiNotification]: (data: {
+		type: "info" | "warn" | "error";
+		message: string;
+	}) => void | Promise<void>;
 };
 
 export type SliceMachineHookNames =

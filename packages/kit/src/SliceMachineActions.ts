@@ -42,7 +42,11 @@ const formatFactory =
 export type SliceMachineActions = {
 	pathFromRoot: ReturnType<typeof pathFromRootFactory>;
 	format: ReturnType<typeof formatFactory>;
-	notify: SliceMachineHooks["ui:notification"];
+	notify: (
+		...args: Parameters<SliceMachineHooks["ui:notification"]>
+	) => Promise<
+		Awaited<ReturnType<SliceMachineHooks["ui:notification"]>[]> | never[]
+	>;
 };
 
 /**

@@ -15,7 +15,10 @@ export default defineSliceMachinePlugin<NuxtPluginOptions>({
 		if (options.typescript) {
 			hook("slice:create", (_data, { notify }, { options }) => {
 				if (options.typescript) {
-					notify("info", "Typescript is enabled");
+					notify({
+						type: "info",
+						message: "Typescript is enabled",
+					});
 				}
 			});
 		}
