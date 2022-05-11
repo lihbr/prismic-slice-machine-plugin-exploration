@@ -3,15 +3,26 @@ import defu from "defu";
 import { HookSystem } from "./lib";
 import { createSliceMachineActions } from "./SliceMachineActions";
 import { createSliceMachineContext } from "./SliceMachineContext";
-import { SliceMachineHookNames, SliceMachineHooks } from "./SliceMachineHooks";
+import {
+	createSliceMachineHookSystem,
+	SliceMachineHookNames,
+	SliceMachineHooks,
+} from "./createSliceMachineHookSystem";
 import {
 	LoadedSliceMachinePlugin,
-	SliceMachinePluginType,
+	SliceMachinePlugin,
 } from "./SliceMachinePlugin";
 import {
 	SliceMachineConfigPluginRegistration,
 	SliceMachineProject,
 } from "./types";
+
+const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
+	"slice:read",
+	"custom-type:read",
+	"library:read",
+	"slice-simulator:setup:read",
+];
 
 /**
  * @internal
@@ -30,7 +41,7 @@ export class SliceMachinePluginRunner {
 
 	private async _loadPlugin(
 		pluginRegistration: SliceMachineConfigPluginRegistration,
-		type: SliceMachinePluginType,
+		plugin?: SliceMachinePlugin,
 	): Promise<LoadedSliceMachinePlugin> {
 		// Sanitize registration
 		const { resolve, options = {} } =
@@ -38,90 +49,81 @@ export class SliceMachinePluginRunner {
 				? { resolve: pluginRegistration }
 				: pluginRegistration;
 
-		// Import plugin
-		const raw = await import(resolve);
-		const maybePlugin = raw.default || raw;
+		if (!plugin) {
+			// Import plugin
+			const raw = await import(resolve);
+			plugin = raw.default || raw;
+		}
 
-		if (!maybePlugin) {
+		if (!plugin) {
 			throw new Error(`Could not load plugin: \`${resolve}\``);
 		}
 
-		// Resolve options
-		const defaultOptions =
-			typeof maybePlugin.defaults === "function"
-				? maybePlugin.defaults(this._project)
-				: maybePlugin.defaults || {};
-
-		const mergedOptions = defu(options, defaultOptions);
+		const mergedOptions = defu(options, plugin.defaultOptions || {});
 
 		return {
-			...maybePlugin,
-			type,
+			...plugin,
 			resolve,
-			userOptions: options,
-			mergedOptions,
+			options: mergedOptions,
 		};
 	}
 
-	private async _usePlugin(plugin: LoadedSliceMachinePlugin): Promise<void> {
+	private async _setupPlugin(plugin: LoadedSliceMachinePlugin): Promise<void> {
 		const actions = createSliceMachineActions(
 			this._project,
 			this._hookSystem,
 			plugin,
 		);
 		const context = createSliceMachineContext(this._project, plugin);
-		const hookHelpers = this._hookSystem.useHooks(
-			plugin.type,
-			plugin.resolve,
-			actions,
-			context,
-		);
+		// const hookHelpers = this._hookSystem.useHooks(
+		// 	plugin.type,
+		// 	plugin.resolve,
+		// 	actions,
+		// 	context,
+		// );
 
 		// Run plugin setup with actions and context
 		await plugin.setup(
 			{
 				...actions,
-				...hookHelpers,
+				hook: this._hookSystem.hook.bind(this._hookSystem),
+				// ...hookHelpers,
 			},
 			context,
 		);
+	}
 
-		// Check if adapter is featurefull
-		if (plugin.type === "adapter") {
-			const adapterHooks = this._hookSystem.inspect(plugin.resolve);
-			const requiredAdapterHooks: SliceMachineHookNames[] = [
-				"slice:read",
-				"custom-type:read",
-				"library:read",
-				"slice-simulator:setup:read",
-			];
+	private _validateAdapter(plugin: LoadedSliceMachinePlugin): void {
+		const hooks = this._hookSystem.hooksForOwner(plugin.resolve);
+		const hookNames = hooks.map((hook) => hook.name);
 
-			const missingHooks = requiredAdapterHooks.filter(
-				(requiredAdapterHook) => !adapterHooks.includes(requiredAdapterHook),
+		const missingHooks = REQUIRED_ADAPTER_HOOKS.filter(
+			(requiredHookName) => !hookNames.includes(requiredHookName),
+		);
+
+		if (missingHooks.length) {
+			throw new Error(
+				`Adapter \`${plugin.resolve}\` is missing hooks: \`${missingHooks.join(
+					"`, `",
+				)}\``,
 			);
-
-			if (missingHooks.length) {
-				throw new Error(
-					`Adapter \`${
-						plugin.resolve
-					}\` is missing hooks: \`${missingHooks.join("`, `")}\``,
-				);
-			}
 		}
 	}
 
 	async init(): Promise<void> {
-		const [adapter, plugins] = await Promise.all([
-			this._loadPlugin(this._project.config.adapter, "adapter"),
-			Promise.all(
-				(this._project.config.plugins ?? []).map((pluginRegistration) =>
-					this._loadPlugin(pluginRegistration, "plugin"),
-				),
+		const [adapter, ...plugins] = await Promise.all([
+			this._loadPlugin(this._project.config.adapter),
+			...(this._project.config.plugins ?? []).map((pluginRegistration) =>
+				this._loadPlugin(pluginRegistration),
 			),
 		]);
 
-		await this._usePlugin(adapter);
-		await Promise.all(plugins.map((plugin) => this._usePlugin(plugin)));
+		await Promise.all([
+			this._setupPlugin(adapter),
+			...plugins.map((plugin) => this._setupPlugin(plugin)),
+		]);
+
+		this._validateAdapter(adapter);
 	}
 }
 
@@ -133,4 +135,37 @@ export const createSliceMachinePluginRunner = (
 	hookSystem: HookSystem<SliceMachineHooks>,
 ): SliceMachinePluginRunner => {
 	return new SliceMachinePluginRunner(project, hookSystem);
+};
+
+const app = async () => {
+	const project: SliceMachineProject = {
+		root: "/tmp/",
+		config: {
+			_latest: "0.0.0",
+			adapter: "@slicemachine/adapter-next",
+			apiEndpoint: "https://qwerty.cdn.prismic.io/api/v2",
+		},
+	};
+
+	const actions = {
+		readSlice: async (sliceLibraryID: string, id: string) => {
+			const x = await hookSystem.callHook(
+				"slice:read",
+				{ sliceLibraryID, id },
+				actions,
+				{},
+			);
+
+			return x;
+		},
+	};
+
+	const hookSystem = createSliceMachineHookSystem();
+	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem, {
+		actions,
+	});
+
+	await pluginRunner.init();
+
+	hookSystem.callHook("slice:create");
 };

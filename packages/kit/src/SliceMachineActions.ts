@@ -4,7 +4,7 @@ import prettier from "prettier";
 import stripIndent from "strip-indent";
 
 import { HookSystem } from "./lib";
-import { SliceMachineHooks } from "./SliceMachineHooks";
+import { SliceMachineHooks } from "./createSliceMachineHookSystem";
 import { LoadedSliceMachinePlugin } from "./SliceMachinePlugin";
 import { SliceMachineProject } from "./types";
 
@@ -16,15 +16,15 @@ const pathFromRootFactory =
 const formatFactory =
 	(project: SliceMachineProject) =>
 	async (
-		raw: string,
-		path: string = project.root,
+		source: string,
+		filePath: string = project.root,
 		options?: {
 			prettier?: prettier.Options;
 		},
 	) => {
-		let formatted = stripIndent(raw);
+		let formatted = stripIndent(source);
 
-		const prettierOptions = await prettier.resolveConfig(path);
+		const prettierOptions = await prettier.resolveConfig(filePath);
 
 		if (prettierOptions) {
 			formatted = prettier.format(formatted, {
@@ -42,11 +42,11 @@ const formatFactory =
 export type SliceMachineActions = {
 	pathFromRoot: ReturnType<typeof pathFromRootFactory>;
 	format: ReturnType<typeof formatFactory>;
-	notify: (
-		...args: Parameters<SliceMachineHooks["ui:notification"]>
-	) => Promise<
-		Awaited<ReturnType<SliceMachineHooks["ui:notification"]>[]> | never[]
-	>;
+	// notify: (
+	// 	...args: Parameters<SliceMachineHooks["ui:notification"]>
+	// ) => Promise<
+	// 	Awaited<ReturnType<SliceMachineHooks["ui:notification"]>[]> | never[]
+	// >;
 };
 
 /**
@@ -56,14 +56,14 @@ export type SliceMachineActions = {
  */
 export const createSliceMachineActions = (
 	project: SliceMachineProject,
-	hookSystem: HookSystem<SliceMachineHooks>,
-	plugin: LoadedSliceMachinePlugin,
+	_hookSystem: HookSystem<SliceMachineHooks>,
+	_plugin: LoadedSliceMachinePlugin,
 ): SliceMachineActions => {
-	const { callHook } = hookSystem.useHooks(plugin.type, plugin.resolve);
+	// const { callHook } = hookSystem.useHooks(plugin.type, plugin.resolve);
 
 	return {
 		pathFromRoot: pathFromRootFactory(project),
 		format: formatFactory(project),
-		notify: (...args) => callHook("ui:notification", ...args),
+		// notify: (...args) => callHook("ui:notification", ...args),
 	};
 };

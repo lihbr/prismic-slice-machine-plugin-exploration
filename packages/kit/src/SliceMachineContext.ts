@@ -24,6 +24,6 @@ export const createSliceMachineContext = <
 ): SliceMachineContext<TPluginOptions> => {
 	return {
 		project,
-		options: plugin.mergedOptions,
+		options: plugin.options,
 	};
 };
