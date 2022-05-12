@@ -89,7 +89,7 @@ export type SliceMachineHookNames =
 
 export type SliceMachineHooks = {
 	// Slices
-	[SliceMachineHookName.slice_create]: SliceCreateHook;
+	[SliceMachineHookName.slice_create]: SliceCreateHookBase;
 	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
 	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
 	[SliceMachineHookName.slice_read]: SliceReadHookBase;
@@ -118,10 +118,10 @@ export type SliceCreateHookData = {
 	libraryID: string;
 	model: prismicT.SharedSliceModel;
 };
-type SliceCreateHook = SliceMachineHook<SliceCreateHookData, void>;
-export type ExtendedSliceCreateHook<
+export type SliceCreateHookBase = SliceMachineHook<SliceCreateHookData, void>;
+export type SliceCreateHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
-> = ExtendSliceMachineHook<SliceCreateHook, TPluginOptions>;
+> = ExtendSliceMachineHook<SliceCreateHookBase, TPluginOptions>;
 
 // ============================================================================
 // ## slice:update
@@ -229,26 +229,26 @@ export type CustomTypeReadHook<
 // ## snippet:read
 // ============================================================================
 
-enum SnippetReadHookDataRootModelType {
-	Slice = "Slice",
-	CustomType = "CustomType",
-}
+export const SnippetReadHookDataRootModelType = {
+	Slice: "Slice",
+	CustomType: "CustomType",
+} as const;
 export type SnippetReadHookData = {
 	fieldPath: string[];
 	sliceLibrary: SliceLibrary;
 } & (
 	| {
-			rootModelType: SnippetReadHookDataRootModelType.Slice;
+			rootModelType: typeof SnippetReadHookDataRootModelType.Slice;
 			rootModel: prismicT.SharedSliceModel;
 			model: prismicT.CustomTypeModelFieldForGroup;
 	  }
 	| {
-			rootModelType: SnippetReadHookDataRootModelType.CustomType;
+			rootModelType: typeof SnippetReadHookDataRootModelType.CustomType;
 			rootModel: prismicT.CustomTypeModel;
 			model: prismicT.CustomTypeModelField;
 	  }
 );
-type SnippetDescriptor = {
+export type SnippetDescriptor = {
 	label: string;
 	language: string;
 	preCode?: string;
@@ -272,7 +272,7 @@ export type SnippetReadHook<
 // ============================================================================
 
 export type LibraryReadHookData = {
-	id: string;
+	libraryID: string;
 };
 export type LibraryReadHookReturnType = SliceLibrary & {
 	sliceIDs: string[];
@@ -294,7 +294,7 @@ export const SliceSimulatorSetupStepStatus = {
 	PartiallyComplete: "PartiallyComplete",
 	Complete: "Complete",
 } as const;
-type SliceSimulatorSetupStep = {
+export type SliceSimulatorSetupStep = {
 	body: string;
 	getStatus: () => typeof SliceSimulatorSetupStepStatus[keyof typeof SliceSimulatorSetupStepStatus];
 };

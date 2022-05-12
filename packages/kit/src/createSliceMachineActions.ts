@@ -6,7 +6,7 @@ import stripIndent from "strip-indent";
 
 import { HookSystem } from "./lib";
 import { LoadedSliceMachinePlugin } from "./defineSliceMachinePlugin";
-import { SliceMachineProject, SliceMachineHooks } from "./types";
+import { SliceMachineProject, SliceMachineHooks, SliceLibrary } from "./types";
 
 type FormatOptions = {
 	prettier?: prettier.Options;
@@ -15,6 +15,10 @@ type FormatOptions = {
 type GetSliceModelArgs = {
 	libraryID: string;
 	sliceID: string;
+};
+
+type ReadLibraryArgs = {
+	libraryID: string;
 };
 
 type NotifyArgs = {
@@ -26,13 +30,16 @@ type NotifyArgs = {
  * Slice Machine actions shared to plugins and hooks.
  */
 export type SliceMachineActions = {
-	pathFromRoot(...paths: string[]): string;
+	joinPathFromRoot(...paths: string[]): string;
 	format(
 		source: string,
 		filePath?: string,
 		options?: FormatOptions,
 	): Promise<string>;
 	getSliceModel(args: GetSliceModelArgs): Promise<prismicT.SharedSliceModel>;
+	readLibrary(
+		args: ReadLibraryArgs,
+	): Promise<SliceLibrary & { sliceIDs: string[] }>;
 	notify(args: NotifyArgs): Promise<void>;
 };
 
@@ -49,7 +56,7 @@ export const createSliceMachineActions = (
 	// const { callHook } = hookSystem.useHooks(plugin.type, plugin.resolve);
 
 	return {
-		pathFromRoot: (...paths) => {
+		joinPathFromRoot: (...paths) => {
 			return join(project.root, ...paths);
 		},
 
@@ -66,6 +73,14 @@ export const createSliceMachineActions = (
 			}
 
 			return formatted;
+		},
+
+		readLibrary: async (args) => {
+			const [library] = await hookSystem.callHook("library:read", {
+				libraryID: args.libraryID,
+			});
+
+			return library;
 		},
 
 		getSliceModel: async (args) => {
