@@ -251,9 +251,7 @@ export type SnippetReadHookData = {
 export type SnippetDescriptor = {
 	label: string;
 	language: string;
-	preCode?: string;
 	code: string;
-	postCode?: string;
 };
 export type SnippetReadHookReturnType =
 	| SnippetDescriptor
