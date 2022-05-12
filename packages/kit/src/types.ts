@@ -47,6 +47,11 @@ export type SliceLibrary = {
 //
 // ============================================================================
 
+export type CallableSliceMachineHook<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	THook extends SliceMachineHook<any, any, any>,
+> = (data: Parameters<THook>[0]) => ReturnType<THook>;
+
 export type SliceMachineHook<
 	TData,
 	TReturn,
@@ -76,7 +81,9 @@ export type SliceMachineHooks<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = {
 	// Slices
-	[SliceMachineHookName.slice_create]: SliceCreateHook<TPluginOptions>;
+	[SliceMachineHookName.slice_create]: CallableSliceMachineHook<
+		SliceCreateHook<TPluginOptions>
+	>;
 	[SliceMachineHookName.slice_update]: SliceUpdateHook<TPluginOptions>;
 	[SliceMachineHookName.slice_delete]: SliceDeleteHook<TPluginOptions>;
 	[SliceMachineHookName.slice_read]: SliceReadHook<TPluginOptions>;
@@ -97,7 +104,9 @@ export type SliceMachineHooks<
 	[SliceMachineHookName.sliceSimulator_setup_read]: SliceSimulatorSetupReadHook<TPluginOptions>;
 
 	// User Interface
-	[SliceMachineHookName.ui_notification]: UINotificationHook<TPluginOptions>;
+	[SliceMachineHookName.ui_notification]: CallableSliceMachineHook<
+		UINotificationHook<TPluginOptions>
+	>;
 };
 
 // ============================================================================

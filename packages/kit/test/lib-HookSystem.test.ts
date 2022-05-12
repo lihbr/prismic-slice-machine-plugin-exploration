@@ -5,7 +5,10 @@ import { HookSystem } from "../src/lib";
 const root = { canHook: ["*"], canCall: ["*"] };
 
 it("calls hooks", async () => {
-	const { hook, callHook } = new HookSystem({ root }).useHooks("root", "root");
+	const { hook, callHook } = new HookSystem({ root }).withExtraArgs(
+		"root",
+		"root",
+	);
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -31,13 +34,17 @@ it("calls hooks", async () => {
 it("calls hooks with scoped additional args", async () => {
 	const system = new HookSystem({ root });
 
-	const { hook: fooHook } = system.useHooks(
+	const { hook: fooHook } = system.withExtraArgs(
 		"root",
 		"foo",
 		"fooArg1",
 		"fooArg2",
 	);
-	const { hook: barHook, callHook } = system.useHooks("root", "bar", "barArg1");
+	const { hook: barHook, callHook } = system.withExtraArgs(
+		"root",
+		"bar",
+		"barArg1",
+	);
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -54,10 +61,11 @@ it("calls hooks with scoped additional args", async () => {
 });
 
 it("stops calling hook when unhooked", async () => {
-	const { hook, unHook, callHook } = new HookSystem({ root }).useHooks(
-		"root",
-		"root",
-	);
+	const {
+		hook,
+		unhook: unHook,
+		callHook,
+	} = new HookSystem({ root }).withExtraArgs("root", "root");
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -86,7 +94,7 @@ it("stops calling hook when unhooked", async () => {
 });
 
 it("returns an empty when no hook", async () => {
-	const { callHook } = new HookSystem({ root }).useHooks("root", "root");
+	const { callHook } = new HookSystem({ root }).withExtraArgs("root", "root");
 
 	const result = await callHook("hook1");
 
@@ -94,7 +102,10 @@ it("returns an empty when no hook", async () => {
 });
 
 it("returns hook return value in order", async () => {
-	const { hook, callHook } = new HookSystem({ root }).useHooks("root", "root");
+	const { hook, callHook } = new HookSystem({ root }).withExtraArgs(
+		"root",
+		"root",
+	);
 
 	const foo = vi.fn(() => "foo");
 	const bar = vi.fn(() => "bar");
@@ -112,8 +123,8 @@ it("doesn't allow unauthorized users to hook", async () => {
 		root,
 		user: { canHook: ["user:*"], canCall: ["*"] },
 	});
-	const { hook: userHook } = system.useHooks("user", "user");
-	const { hook: rootHook, callHook } = system.useHooks("root", "root");
+	const { hook: userHook } = system.withExtraArgs("user", "user");
+	const { hook: rootHook, callHook } = system.withExtraArgs("root", "root");
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -145,8 +156,8 @@ it("doesn't allow unauthorized users to call hook", async () => {
 		root,
 		user: { canHook: ["*"], canCall: ["user:*"] },
 	});
-	const { callHook: userCallHook } = system.useHooks("user", "user");
-	const { hook, callHook: rootCallHook } = system.useHooks("root", "root");
+	const { callHook: userCallHook } = system.withExtraArgs("user", "user");
+	const { hook, callHook: rootCallHook } = system.withExtraArgs("root", "root");
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -178,8 +189,8 @@ it("doesn't allow unauthorized users to call hook", async () => {
 it("allows inspection of user hooks", () => {
 	const system = new HookSystem({ root });
 
-	const { hook: fooHook } = system.useHooks("root", "foo");
-	const { hook: barHook } = system.useHooks("root", "bar");
+	const { hook: fooHook } = system.withExtraArgs("root", "foo");
+	const { hook: barHook } = system.withExtraArgs("root", "bar");
 
 	fooHook("hook1", vi.fn());
 	fooHook("hook2", vi.fn());
