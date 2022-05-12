@@ -26,9 +26,12 @@ export type SliceMachinePlugin<
 	 */
 	setup: (
 		actions: SliceMachineActions &
-			CreateScopeReturnType<
-				SliceMachineHooks,
-				SliceMachineHookExtraArgs<TPluginOptions>
+			Pick<
+				CreateScopeReturnType<
+					SliceMachineHooks,
+					SliceMachineHookExtraArgs<TPluginOptions>
+				>,
+				"hook" | "unhook"
 			>,
 		context: SliceMachineContext<TPluginOptions>,
 	) => void | Promise<void>;
