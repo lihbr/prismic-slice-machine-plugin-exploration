@@ -53,8 +53,6 @@ export const createSliceMachineActions = (
 	hookSystem: HookSystem<SliceMachineHooks>,
 	_plugin: LoadedSliceMachinePlugin,
 ): SliceMachineActions => {
-	// const { callHook } = hookSystem.useHooks(plugin.type, plugin.resolve);
-
 	return {
 		joinPathFromRoot: (...paths) => {
 			return join(project.root, ...paths);

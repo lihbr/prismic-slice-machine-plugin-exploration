@@ -1,6 +1,6 @@
+import { CreateScopeReturnType } from "./lib";
 import { SliceMachineActions } from "./createSliceMachineActions";
 import { SliceMachineContext } from "./createSliceMachineContext";
-import { UseHooksReturnType } from "./lib";
 import { SliceMachineHookExtraArgs, SliceMachineHooks } from "./types";
 
 /**
@@ -26,7 +26,7 @@ export type SliceMachinePlugin<
 	 */
 	setup: (
 		actions: SliceMachineActions &
-			UseHooksReturnType<
+			CreateScopeReturnType<
 				SliceMachineHooks,
 				SliceMachineHookExtraArgs<TPluginOptions>
 			>,

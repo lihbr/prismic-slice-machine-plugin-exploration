@@ -7,7 +7,7 @@ export type HookFn<TArgs extends any[] = any[], TReturn = any> = (
 ) => Promise<TReturn> | TReturn;
 
 /**
- * Defines a hook handler.
+ * Extends a function arguments with extra ones.
  */
 export type WithExtraArgs<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,14 +17,6 @@ export type WithExtraArgs<
 > = (
 	...args: [...args: Parameters<F>, ...extraArgs: TExtraArgs]
 ) => ReturnType<F>;
-
-// /**
-//  * Defines a hook group for users to belong to.
-//  */
-// export type HookGroup = {
-// 	canHook: string[];
-// 	canCall: string[];
-// };
 
 /**
  * Extends hooks with extra args.
@@ -37,7 +29,7 @@ type HookFnsWithExtraArgs<
 };
 
 /**
- * Defines the return type of the {@link HookSystem.withExtraArgs} functions.
+ * Defines the return type of the {@link HookSystem.createScope} functions.
  */
 export type CreateScopeReturnType<
 	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
@@ -49,8 +41,6 @@ export type CreateScopeReturnType<
 		meta?: Partial<RegisteredHookMeta>,
 	) => void;
 	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
-	// callHook: HookSystem<THookFns>["callHook"];
-	// hooksForOwner: HookSystem<THookFns>["hooksForOwner"];
 };
 
 type RegisteredHookMeta = {
@@ -74,7 +64,7 @@ type RegisteredHook<THookFn extends HookFn = HookFn> = {
 export class HookSystem<
 	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
 > {
-	private registeredHooks: {
+	private _registeredHooks: {
 		[K in keyof THookFns]?: RegisteredHook<THookFns[K]>[];
 	} = {};
 
@@ -84,12 +74,12 @@ export class HookSystem<
 		hookFn: THookFns[TName],
 		meta: Partial<RegisteredHookMeta> = {},
 	): void {
-		if (!this.registeredHooks[name]) {
-			this.registeredHooks[name] = [];
+		if (!this._registeredHooks[name]) {
+			this._registeredHooks[name] = [];
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		this.registeredHooks[name]!.push({
+		this._registeredHooks[name]!.push({
 			fn: hookFn,
 			meta: {
 				...meta,
@@ -103,10 +93,8 @@ export class HookSystem<
 		name: TName,
 		hookFn: THookFns[TName],
 	): void {
-		this.registeredHooks[name] = this.registeredHooks[name]?.filter(
-			(registeredHook) => {
-				registeredHook.fn !== hookFn;
-			},
+		this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+			(registeredHook) => registeredHook.fn !== hookFn,
 		);
 	}
 
@@ -114,23 +102,23 @@ export class HookSystem<
 		name: TName,
 		...args: Parameters<THookFns[TName]>
 	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
-		const hooks = this.registeredHooks[name] ?? [];
+		const hooks = this._registeredHooks[name] ?? [];
 
-		const promises = hooks.map(async (hooked) => {
-			return (await hooked.fn(...args)) as ReturnType<THookFns[TName]>;
+		const promises = hooks.map((hook) => {
+			return hook.fn(...args) as ReturnType<THookFns[TName]>;
 		});
 
 		return await Promise.all(promises);
 	}
 
 	/**
-	 * Returns list of hooks
+	 * Returns list of hooks for a given owner
 	 */
 	hooksForOwner(owner: string): RegisteredHook[] {
 		const hooks: RegisteredHook[] = [];
 
-		for (const hookName in this.registeredHooks) {
-			const registeredHooks = this.registeredHooks[hookName] ?? [];
+		for (const hookName in this._registeredHooks) {
+			const registeredHooks = this._registeredHooks[hookName] ?? [];
 
 			for (const registeredHook of registeredHooks) {
 				if (registeredHook.meta.owner === owner) {
@@ -142,17 +130,10 @@ export class HookSystem<
 		return hooks;
 	}
 
-	/**
-	 * Use hook system as a user from given group. Additional arguments can be
-	 * passed to the hooks.
-	 *
-	 * @param extraArgs - Any additional arguments to pass to the hooks used.
-	 *
-	 * @returns `hook`, `unHook`, and `callHook` functions for the group.
-	 */
 	createScope<TExtraArgs extends unknown[] = never[]>(
 		owner: string,
 		extraArgs: [...TExtraArgs],
+		meta: Partial<RegisteredHookMeta> = {},
 	): CreateScopeReturnType<THookFns, TExtraArgs> {
 		return {
 			hook: <TName extends Extract<keyof THookFns, string>>(
@@ -164,14 +145,13 @@ export class HookSystem<
 				}) as THookFns[TName];
 
 				return this.hook(owner, name, internalHook, {
+					...meta,
 					external: hookFn,
 				});
 			},
 			unhook: (name, hookFn) => {
-				this.registeredHooks[name] = this.registeredHooks[name]?.filter(
-					(registeredHook) => {
-						registeredHook.meta.external !== hookFn;
-					},
+				this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+					(registeredHook) => registeredHook.meta.external !== hookFn,
 				);
 			},
 		};

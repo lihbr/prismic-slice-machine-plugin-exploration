@@ -21,6 +21,7 @@ const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
 	"library:read",
 	"slice-simulator:setup:read",
 ];
+const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
 
 /**
  * @internal
@@ -66,7 +67,10 @@ export class SliceMachinePluginRunner {
 		};
 	}
 
-	private async _setupPlugin(plugin: LoadedSliceMachinePlugin): Promise<void> {
+	private async _setupPlugin(
+		plugin: LoadedSliceMachinePlugin,
+		as: "adapter" | "plugin",
+	): Promise<void> {
 		const actions = createSliceMachineActions(
 			this._project,
 			this._hookSystem,
@@ -80,11 +84,23 @@ export class SliceMachinePluginRunner {
 				[actions, context],
 			);
 
+		// Prevent plugins from hooking to adapter only hooks
+		const hook: typeof hookSystemScope.hook =
+			as === "adapter"
+				? hookSystemScope.hook
+				: (name, hook, meta) => {
+						if (ADAPTER_ONLY_HOOKS.includes(name)) {
+							return;
+						}
+
+						return hookSystemScope.hook(name, hook, meta);
+				  };
+
 		// Run plugin setup with actions and context
 		await plugin.setup(
 			{
 				...actions,
-				hook: hookSystemScope.hook,
+				hook,
 				unhook: hookSystemScope.unhook,
 			},
 			context,
@@ -116,9 +132,10 @@ export class SliceMachinePluginRunner {
 			].map((pluginRegistration) => this._loadPlugin(pluginRegistration)),
 		);
 
-		await Promise.all(
-			[adapter, ...plugins].map((plugin) => this._setupPlugin(plugin)),
-		);
+		await Promise.all([
+			this._setupPlugin(adapter, "adapter"),
+			...plugins.map((plugin) => this._setupPlugin(plugin, "plugin")),
+		]);
 
 		this._validateAdapter(adapter);
 	}

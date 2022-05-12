@@ -2,29 +2,26 @@ import { it, expect, vi } from "vitest";
 
 import { HookSystem } from "../src/lib";
 
-const root = { canHook: ["*"], canCall: ["*"] };
+// TODO: Refactor tests to clearly separate base usage from createScope usage
 
 it("calls hooks", async () => {
-	const { hook, callHook } = new HookSystem({ root }).withExtraArgs(
-		"root",
-		"root",
-	);
+	const system = new HookSystem();
 
 	const foo = vi.fn();
 	const bar = vi.fn();
 	const baz = vi.fn();
 
-	hook("hook1", foo);
-	hook("hook1", bar);
-	hook("hook2", baz);
+	system.hook("root", "hook1", foo);
+	system.hook("root", "hook1", bar);
+	system.hook("root", "hook2", baz);
 
-	await callHook("hook1");
+	await system.callHook("hook1");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(bar).toHaveBeenCalledTimes(1);
 	expect(baz).not.toHaveBeenCalled();
 
-	await callHook("hook2");
+	await system.callHook("hook2");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(bar).toHaveBeenCalledTimes(1);
@@ -32,19 +29,10 @@ it("calls hooks", async () => {
 });
 
 it("calls hooks with scoped additional args", async () => {
-	const system = new HookSystem({ root });
+	const system = new HookSystem();
 
-	const { hook: fooHook } = system.withExtraArgs(
-		"root",
-		"foo",
-		"fooArg1",
-		"fooArg2",
-	);
-	const { hook: barHook, callHook } = system.withExtraArgs(
-		"root",
-		"bar",
-		"barArg1",
-	);
+	const { hook: fooHook } = system.createScope("foo", ["fooArg1", "fooArg2"]);
+	const { hook: barHook } = system.createScope("bar", ["barArg1"]);
 
 	const foo = vi.fn();
 	const bar = vi.fn();
@@ -52,7 +40,7 @@ it("calls hooks with scoped additional args", async () => {
 	fooHook("hook", foo);
 	barHook("hook", bar);
 
-	await callHook("hook", "quxArg1");
+	await system.callHook("hook", "quxArg1");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(foo).toHaveBeenCalledWith("quxArg1", "fooArg1", "fooArg2");
@@ -61,142 +49,78 @@ it("calls hooks with scoped additional args", async () => {
 });
 
 it("stops calling hook when unhooked", async () => {
-	const {
-		hook,
-		unhook: unHook,
-		callHook,
-	} = new HookSystem({ root }).withExtraArgs("root", "root");
+	const system = new HookSystem();
+
+	const { hook, unhook } = system.createScope("root", []);
 
 	const foo = vi.fn();
 	const bar = vi.fn();
 
-	const unhook = hook("hook1", foo);
+	system.hook("root", "hook1", foo);
 	hook("hook1", bar);
 
-	await callHook("hook1");
+	await system.callHook("hook1");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(bar).toHaveBeenCalledTimes(1);
 
-	unhook();
+	system.unhook("hook1", foo);
 
-	await callHook("hook1");
+	await system.callHook("hook1");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(bar).toHaveBeenCalledTimes(2);
 
-	unHook("hook1", bar);
+	unhook("hook1", bar);
 
-	await callHook("hook1");
+	await system.callHook("hook1");
 
 	expect(foo).toHaveBeenCalledTimes(1);
 	expect(bar).toHaveBeenCalledTimes(2);
 });
 
-it("returns an empty when no hook", async () => {
-	const { callHook } = new HookSystem({ root }).withExtraArgs("root", "root");
+it("returns an empty array when no hook registered", async () => {
+	const system = new HookSystem();
 
-	const result = await callHook("hook1");
+	const result = await system.callHook("hook1");
 
 	expect(result).toStrictEqual([]);
 });
 
-it("returns hook return value in order", async () => {
-	const { hook, callHook } = new HookSystem({ root }).withExtraArgs(
-		"root",
-		"root",
-	);
+it("returns hook returned values in order", async () => {
+	const system = new HookSystem();
+
+	const { hook } = system.createScope("root", []);
 
 	const foo = vi.fn(() => "foo");
 	const bar = vi.fn(() => "bar");
 
-	hook("hook1", foo);
+	system.hook("root", "hook1", foo);
 	hook("hook1", bar);
 
-	const result = await callHook("hook1");
+	const result = await system.callHook("hook1");
 
 	expect(result).toStrictEqual(["foo", "bar"]);
 });
 
-it("doesn't allow unauthorized users to hook", async () => {
-	const system = new HookSystem({
-		root,
-		user: { canHook: ["user:*"], canCall: ["*"] },
-	});
-	const { hook: userHook } = system.withExtraArgs("user", "user");
-	const { hook: rootHook, callHook } = system.withExtraArgs("root", "root");
+it("allows inspection of owner registered hooks", () => {
+	const system = new HookSystem();
 
-	const foo = vi.fn();
-	const bar = vi.fn();
-	const baz = vi.fn();
-	const qux = vi.fn();
+	const { hook } = system.createScope("bar", []);
 
-	userHook("hook1", foo);
-	userHook("user:hook2", bar);
-	rootHook("hook1", baz);
-	rootHook("user:hook2", qux);
+	system.hook("foo", "hook1", vi.fn());
+	system.hook("foo", "hook2", vi.fn());
+	system.hook("foo", "hook3", vi.fn());
+	hook("hook1", vi.fn());
 
-	await callHook("hook1");
-
-	expect(foo).not.toHaveBeenCalled();
-	expect(bar).not.toHaveBeenCalled();
-	expect(baz).toHaveBeenCalledTimes(1);
-	expect(qux).not.toHaveBeenCalled();
-
-	await callHook("user:hook2");
-
-	expect(foo).not.toHaveBeenCalled();
-	expect(bar).toHaveBeenCalledTimes(1);
-	expect(baz).toHaveBeenCalledTimes(1);
-	expect(qux).toHaveBeenCalledTimes(1);
-});
-
-it("doesn't allow unauthorized users to call hook", async () => {
-	const system = new HookSystem({
-		root,
-		user: { canHook: ["*"], canCall: ["user:*"] },
-	});
-	const { callHook: userCallHook } = system.withExtraArgs("user", "user");
-	const { hook, callHook: rootCallHook } = system.withExtraArgs("root", "root");
-
-	const foo = vi.fn();
-	const bar = vi.fn();
-
-	hook("hook1", foo);
-	hook("user:hook2", bar);
-
-	await userCallHook("hook1");
-
-	expect(foo).not.toHaveBeenCalled();
-	expect(bar).not.toHaveBeenCalled();
-
-	await userCallHook("user:hook2");
-
-	expect(foo).not.toHaveBeenCalled();
-	expect(bar).toHaveBeenCalledTimes(1);
-
-	await rootCallHook("hook1");
-
-	expect(foo).toHaveBeenCalledTimes(1);
-	expect(bar).toHaveBeenCalledTimes(1);
-
-	await rootCallHook("user:hook2");
-
-	expect(foo).toHaveBeenCalledTimes(1);
-	expect(bar).toHaveBeenCalledTimes(2);
-});
-
-it("allows inspection of user hooks", () => {
-	const system = new HookSystem({ root });
-
-	const { hook: fooHook } = system.withExtraArgs("root", "foo");
-	const { hook: barHook } = system.withExtraArgs("root", "bar");
-
-	fooHook("hook1", vi.fn());
-	fooHook("hook2", vi.fn());
-	fooHook("hook3", vi.fn());
-	barHook("hook1", vi.fn());
-
-	expect(system.inspect("foo")).toStrictEqual(["hook1", "hook2", "hook3"]);
-	expect(system.inspect("bar")).toStrictEqual(["hook1"]);
+	expect(
+		system
+			.hooksForOwner("foo")
+			.map((registeredHook) => registeredHook.meta.name),
+	).toStrictEqual(["hook1", "hook2", "hook3"]);
+	expect(
+		system
+			.hooksForOwner("bar")
+			.map((registeredHook) => registeredHook.meta.name),
+	).toStrictEqual(["hook1"]);
 });
