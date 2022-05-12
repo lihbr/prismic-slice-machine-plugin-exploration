@@ -156,46 +156,4 @@ export class HookSystem<
 			},
 		};
 	}
-
-	// createCallHookScope<TExtraArgs extends unknown[] = never[]>(
-	// 	extraArgs: TExtraArgs,
-	// ) {
-	// 	return <TName extends Extract<keyof THookFns, string>>(
-	// 		name: TName,
-	// 		...args: Parameters<THookFns[TName]>
-	// 	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> => {
-	// 		return this.callHook(name, ...args, ...extraArgs);
-	// 	};
-	// }
-
-	// /**
-	//  * Additional arguments can be passed to the hooks.
-	//  *
-	//  * @param extraArgs - Any additional arguments to pass to the hooks used.
-	//  *
-	//  * @returns `hook`, `unHook`, and `callHook` functions for the group.
-	//  */
-	// cloneWithExtraHookArgs<TExtraArgs extends unknown[] = never[]>(
-	// 	extraArgs: TExtraArgs,
-	// ): HookSystem<THookFns> {
-	// 	const newSystem = new HookSystem<THookFns>();
-
-	// 	for (const hookName in this.registeredHooks) {
-	// 		const registeredHooks = this.registeredHooks[hookName] ?? [];
-
-	// 		for (const registeredHook of registeredHooks) {
-	// 			const hookWithExtraArgs = ((
-	// 				...args: Parameters<THookFns[typeof hookName]>
-	// 			) => {
-	// 				return registeredHook.fn(...args, ...extraArgs);
-	// 			}) as THookFns[typeof hookName];
-
-	// 			newSystem.hook(registeredHook.meta.owner, hookName, hookWithExtraArgs, {
-	// 				external: registeredHook.fn,
-	// 			});
-	// 		}
-	// 	}
-
-	// 	return newSystem;
-	// }
 }
