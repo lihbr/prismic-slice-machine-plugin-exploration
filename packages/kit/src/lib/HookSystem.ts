@@ -104,8 +104,8 @@ export class HookSystem<
 	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
 		const hooks = this._registeredHooks[name] ?? [];
 
-		const promises = hooks.map((hooked) => {
-			return hooked.fn(...args) as ReturnType<THookFns[TName]>;
+		const promises = hooks.map((hook) => {
+			return hook.fn(...args) as ReturnType<THookFns[TName]>;
 		});
 
 		return await Promise.all(promises);
