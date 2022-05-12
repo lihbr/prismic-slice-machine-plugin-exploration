@@ -1,5 +1,5 @@
 {
-	"name": "@slicemachine/plugin-test-utils",
+	"name": "@slicemachine/adapter-next",
 	"version": "0.0.0",
 	"description": "package_description",
 	"keywords": [
@@ -9,7 +9,7 @@
 	"repository": {
 		"type": "git",
 		"url": "ssh://git@github.com/prismicio/slice-machine-plugin.git",
-		"directory": "packages/test-utils"
+		"directory": "packages/adapter-next"
 	},
 	"license": "Apache-2.0",
 	"author": "Prismic <contact@prismic.io> (https://prismic.io)",
@@ -24,11 +24,7 @@
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
-	"bin": {
-		"slice-machine-plugin-test": "./bin/cli.mjs"
-	},
 	"files": [
-		"bin",
 		"dist",
 		"src"
 	],
@@ -44,10 +40,18 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
-		"@slicemachine/plugin-kit": "^0.0.0"
+		"@slicemachine/plugin-kit": "^0.0.0",
+		"pascal-case": "^3.1.2",
+		"prismic-ts-codegen": "^0.0.2",
+		"semver": "^7.3.7"
 	},
 	"devDependencies": {
+		"@prismicio/mock": "^0.0.10",
+		"@prismicio/types": "^0.1.27",
+		"@types/mock-fs": "^4.13.1",
+		"@types/semver": "^7.3.9",
 		"c8": "^7.11.2",
+		"mock-fs": "^5.1.2",
 		"siroc": "^0.16.0",
 		"standard-version": "^9.3.2",
 		"typescript": "^4.6.3",

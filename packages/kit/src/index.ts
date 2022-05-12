@@ -1,16 +1,62 @@
 // Public (for plugin authors)
 
-export type { SliceMachinePlugin } from "./SliceMachinePlugin";
-export { defineSliceMachinePlugin } from "./SliceMachinePlugin";
+export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
+export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
 
-export type { SliceMachineHook } from "./SliceMachineHooks";
-export type { SliceMachineActions } from "./SliceMachineActions";
-export type { SliceMachineContext } from "./SliceMachineContext";
+export type { SliceMachineActions } from "./createSliceMachineActions";
+export type { SliceMachineContext } from "./createSliceMachineContext";
+
+export { SnippetReadHookDataRootModelType } from "./types";
+
+export type {
+	PluginOptions,
+	SliceMachineProject,
+	SliceMachineConfig,
+	SliceLibrary,
+	// Public hooks
+	// -- slice:create
+	SliceCreateHook,
+	SliceCreateHookData,
+	// -- slice:update
+	SliceUpdateHook,
+	SliceUpdateHookData,
+	// -- slice:delete
+	SliceDeleteHook,
+	SliceDeleteHookData,
+	// -- slice:read
+	SliceReadHook,
+	SliceReadHookData,
+	// -- customType:create
+	CustomTypeCreateHook,
+	CustomTypeCreateHookData,
+	// -- customType:update
+	CustomTypeUpdateHook,
+	CustomTypeUpdateHookData,
+	// -- customType:delete
+	CustomTypeDeleteHook,
+	CustomTypeDeleteHookData,
+	// -- customType:read
+	CustomTypeReadHook,
+	CustomTypeReadHookData,
+	// -- snippet:read
+	SnippetReadHook,
+	SnippetReadHookData,
+	SnippetReadHookReturnType,
+	SnippetDescriptor,
+	// -- library:read
+	LibraryReadHook,
+	LibraryReadHookData,
+	LibraryReadHookReturnType,
+	// -- slice-simulator:setup:read
+	SliceSimulatorSetupStepStatus,
+	SliceSimulatorSetupReadHookReturnType,
+	SliceSimulatorSetupStep,
+	SliceSimulatorSetupReadHook,
+} from "./types";
 
 // Internal (for Slice Machine)
 
-export { createSliceMachineHooks } from "./SliceMachineHooks";
-export type { SliceMachineHooks } from "./SliceMachineHooks";
+export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
 
-export { createSliceMachinePluginRunner } from "./SliceMachinePluginRunner";
-export type { SliceMachinePluginRunner } from "./SliceMachinePluginRunner";
+export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";

@@ -1,222 +1,201 @@
-import micromatch from "micromatch";
-import memoizee from "memoizee";
-
-const isAuthorized = memoizee(micromatch.isMatch);
-const mockFunction = () => {
-	/* ... */
-};
-
 /**
  * Defines a hook handler.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Hook<TArgs extends any[] = any[], TReturn = any> = (
+export type HookFn<TArgs extends any[] = any[], TReturn = any> = (
 	...args: TArgs
 ) => Promise<TReturn> | TReturn;
 
 /**
- * Defines a hook group for users to belong to.
+ * Extends a function arguments with extra ones.
  */
-export type HookGroup = {
-	canHook: string[];
-	canCall: string[];
-};
+export type WithExtraArgs<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	F extends (...args: any[]) => any,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TExtraArgs extends any[] = any[],
+> = (
+	...args: [...args: Parameters<F>, ...extraArgs: TExtraArgs]
+) => ReturnType<F>;
 
 /**
  * Extends hooks with extra args.
  */
-type ExtendHooks<
-	THooks extends Record<string, Hook> = Record<string, Hook>,
+type HookFnsWithExtraArgs<
+	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
 	TExtraArgs extends unknown[] = never[],
-	THookNames extends keyof THooks & string = keyof THooks & string,
 > = {
-	[K in THookNames]: (
-		...args: [...args: Parameters<THooks[K]>, ...extraArgs: TExtraArgs]
-	) => ReturnType<THooks[K]>;
+	[K in keyof THookFns]: WithExtraArgs<THookFns[K], TExtraArgs>;
 };
 
 /**
- * Defines the return type of the {@link HookSystem.useHooks} functions.
+ * Defines the return type of the {@link HookSystem.createScope} functions.
  */
-export type UseHooksReturnType<
-	THooks extends Record<string, Hook> = Record<string, Hook>,
+export type CreateScopeReturnType<
+	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
 	TExtraArgs extends unknown[] = never[],
-	TGroupNames extends string = string,
-	THookNames extends keyof THooks & string = keyof THooks & string,
 > = {
-	hook: <TName extends THookNames>(
+	hook: <TName extends Extract<keyof THookFns, string>>(
 		name: TName,
-		hook: ExtendHooks<THooks, TExtraArgs>[TName],
-	) => () => void;
-	unHook: HookSystem<
-		ExtendHooks<THooks, TExtraArgs>,
-		TGroupNames,
-		THookNames
-	>["unHook"];
-	callHook: HookSystem<THooks, TGroupNames, THookNames>["callHook"];
+		hook: WithExtraArgs<THookFns[TName], TExtraArgs>,
+		meta?: Partial<RegisteredHookMeta>,
+	) => void;
+	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
+};
+
+type RegisteredHookMeta = {
+	name: string;
+	owner: string;
+	external?: HookFn;
+	[key: string]: unknown;
 };
 
 /**
- * Represents a hook hooked to the system.
+ * Represents a registered hook.
  */
-type Hooked<THook extends Hook = Hook, TGroupID extends string = string> = {
-	groupID: TGroupID;
-	userID: string;
-	hook: THook;
-	meta: Record<string, unknown>;
+type RegisteredHook<THookFn extends HookFn = HookFn> = {
+	fn: THookFn;
+	meta: RegisteredHookMeta;
 };
 
 /**
  * @internal
  */
 export class HookSystem<
-	THooks extends Record<string, Hook> = Record<string, Hook>,
-	TGroupNames extends string = string,
-	THookNames extends keyof THooks & string = keyof THooks & string,
-	TGroups extends Record<TGroupNames, HookGroup> = Record<
-		TGroupNames,
-		HookGroup
-	>,
+	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
 > {
-	protected groups: TGroups;
-
-	private _hooks: {
-		[K in THookNames]?: Hooked<THooks[K], TGroupNames>[];
+	private _registeredHooks: {
+		[K in keyof THookFns]?: RegisteredHook<THookFns[K]>[];
 	} = {};
 
-	constructor(groups: TGroups) {
-		this.groups = groups;
-	}
-
-	protected getGroup(groupID: TGroupNames): HookGroup {
-		const group = this.groups[groupID];
-
-		if (!group) {
-			throw new Error(
-				`Hook group \`${groupID}\` does not exist, available hook groups: \`${Object.keys(
-					this.groups,
-				)}\``,
-			);
-		}
-
-		return group;
-	}
-
-	protected hook<TName extends THookNames>(
-		groupID: TGroupNames,
-		userID: string,
+	hook<TName extends Extract<keyof THookFns, string>>(
+		owner: string,
 		name: TName,
-		hook: THooks[TName],
-		meta: Record<string, unknown> = {},
-	): () => void {
-		if (!name || typeof hook !== "function") {
-			return mockFunction;
-		}
-
-		this._hooks[name] ||= [];
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		this._hooks[name]!.push({
-			groupID,
-			userID,
-			hook,
-			meta,
-		});
-
-		return () => {
-			this.unHook(name, hook);
-		};
-	}
-
-	protected unHook<TName extends THookNames>(
-		name: TName,
-		hook: THooks[TName],
+		hookFn: THookFns[TName],
+		meta: Partial<RegisteredHookMeta> = {},
 	): void {
-		this._hooks[name] = this._hooks[name]?.filter(
-			(hooked) => hooked.hook !== hook,
+		if (!this._registeredHooks[name]) {
+			this._registeredHooks[name] = [];
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		this._registeredHooks[name]!.push({
+			fn: hookFn,
+			meta: {
+				...meta,
+				owner,
+				name,
+			},
+		});
+	}
+
+	unhook<TName extends Extract<keyof THookFns, string>>(
+		name: TName,
+		hookFn: THookFns[TName],
+	): void {
+		this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+			(registeredHook) => registeredHook.fn !== hookFn,
 		);
 	}
 
-	protected async callHook<TName extends THookNames>(
+	async callHook<TName extends Extract<keyof THookFns, string>>(
 		name: TName,
-		...args: Parameters<THooks[TName]>
-	): Promise<Awaited<ReturnType<THooks[TName]>[]> | never[]> {
-		const hooks = this._hooks[name] ?? [];
+		...args: Parameters<THookFns[TName]>
+	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
+		const hooks = this._registeredHooks[name] ?? [];
 
-		const promises = hooks.map(
-			(hooked) => hooked.hook(...args) as ReturnType<THooks[TName]>,
-		);
+		const promises = hooks.map((hook) => {
+			return hook.fn(...args) as ReturnType<THookFns[TName]>;
+		});
 
 		return await Promise.all(promises);
 	}
 
 	/**
-	 * Inspects hooks a user hooked to.
-	 *
-	 * @param userID - The user to inspect.
-	 *
-	 * @returns A list of hooks that the user hooked to.
+	 * Returns list of hooks for a given owner
 	 */
-	inspect(userID: string): THookNames[] {
-		return (
-			Object.entries(this._hooks) as [
-				THookNames,
-				Hooked<THooks[keyof THooks], TGroupNames>[],
-			][]
-		).reduce<THookNames[]>((hooks, [name, hookedArray]) => {
-			if (hookedArray.find((hooked) => hooked.userID === userID)) {
-				hooks.push(name);
-			}
+	hooksForOwner(owner: string): RegisteredHook[] {
+		const hooks: RegisteredHook[] = [];
 
-			return hooks;
-		}, []);
+		for (const hookName in this._registeredHooks) {
+			const registeredHooks = this._registeredHooks[hookName] ?? [];
+
+			for (const registeredHook of registeredHooks) {
+				if (registeredHook.meta.owner === owner) {
+					hooks.push(registeredHook);
+				}
+			}
+		}
+
+		return hooks;
 	}
 
-	/**
-	 * Use hook system as a user from given group. Additional arguments can be
-	 * passed to the hooks.
-	 *
-	 * @param groupID - The group to use hooks with.
-	 * @param userID - The user to use hooks with.
-	 * @param extraArgs - Any additional arguments to pass to the hooks used.
-	 *
-	 * @returns `hook`, `unHook`, and `callHook` functions for the group.
-	 */
-	useHooks<TExtraArgs extends unknown[] = never[]>(
-		groupID: TGroupNames,
-		userID: string,
-		...extraArgs: TExtraArgs
-	): UseHooksReturnType<THooks, TExtraArgs, TGroupNames, THookNames> {
-		const group = this.getGroup(groupID);
-
+	createScope<TExtraArgs extends unknown[] = never[]>(
+		owner: string,
+		extraArgs: [...TExtraArgs],
+		meta: Partial<RegisteredHookMeta> = {},
+	): CreateScopeReturnType<THookFns, TExtraArgs> {
 		return {
-			hook: <TName extends THookNames>(
+			hook: <TName extends Extract<keyof THookFns, string>>(
 				name: TName,
-				hook: ExtendHooks<THooks, TExtraArgs>[TName],
-			): (() => void) => {
-				if (!isAuthorized(name, group.canHook)) {
-					return mockFunction;
-				}
+				hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
+			): void => {
+				const internalHook = ((...args: Parameters<THookFns[TName]>) => {
+					return hookFn(...args, ...extraArgs);
+				}) as THookFns[TName];
 
-				const internalHook = ((...args: Parameters<THooks[TName]>) => {
-					return hook(...args, ...extraArgs);
-				}) as THooks[TName];
-
-				return this.hook(groupID, userID, name, internalHook, {
-					external: hook,
+				return this.hook(owner, name, internalHook, {
+					...meta,
+					external: hookFn,
 				});
 			},
-			unHook: (name, hook) => {
-				this._hooks[name] = this._hooks[name]?.filter(
-					(hooked) => hooked.meta.external !== hook,
+			unhook: (name, hookFn) => {
+				this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+					(registeredHook) => registeredHook.meta.external !== hookFn,
 				);
-			},
-			callHook: (name, ...args) => {
-				if (!isAuthorized(name, group.canCall)) {
-					return new Promise((resolve) => resolve([]));
-				}
-
-				return this.callHook(name, ...args);
 			},
 		};
 	}
+
+	// createCallHookScope<TExtraArgs extends unknown[] = never[]>(
+	// 	extraArgs: TExtraArgs,
+	// ) {
+	// 	return <TName extends Extract<keyof THookFns, string>>(
+	// 		name: TName,
+	// 		...args: Parameters<THookFns[TName]>
+	// 	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> => {
+	// 		return this.callHook(name, ...args, ...extraArgs);
+	// 	};
+	// }
+
+	// /**
+	//  * Additional arguments can be passed to the hooks.
+	//  *
+	//  * @param extraArgs - Any additional arguments to pass to the hooks used.
+	//  *
+	//  * @returns `hook`, `unHook`, and `callHook` functions for the group.
+	//  */
+	// cloneWithExtraHookArgs<TExtraArgs extends unknown[] = never[]>(
+	// 	extraArgs: TExtraArgs,
+	// ): HookSystem<THookFns> {
+	// 	const newSystem = new HookSystem<THookFns>();
+
+	// 	for (const hookName in this.registeredHooks) {
+	// 		const registeredHooks = this.registeredHooks[hookName] ?? [];
+
+	// 		for (const registeredHook of registeredHooks) {
+	// 			const hookWithExtraArgs = ((
+	// 				...args: Parameters<THookFns[typeof hookName]>
+	// 			) => {
+	// 				return registeredHook.fn(...args, ...extraArgs);
+	// 			}) as THookFns[typeof hookName];
+
+	// 			newSystem.hook(registeredHook.meta.owner, hookName, hookWithExtraArgs, {
+	// 				external: registeredHook.fn,
+	// 			});
+	// 		}
+	// 	}
+
+	// 	return newSystem;
+	// }
 }

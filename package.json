@@ -32,8 +32,8 @@
 	"//": "Order matters!",
 	"workspaces": [
 		"packages/kit",
-		"packages/test-utils",
-		"packages/adapter-nuxt"
+		"packages/adapter-nuxt",
+		"packages/adapter-next"
 	],
 	"engines": {
 		"node": ">=12.7.0"
