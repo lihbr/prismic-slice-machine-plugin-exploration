@@ -1,8 +1,7 @@
-import { SliceMachineActions } from "./SliceMachineActions";
-import { SliceMachineContext } from "./SliceMachineContext";
-import { SliceMachineHooks } from "./createSliceMachineHookSystem";
-import { SliceMachineProject } from "./types";
-import { HookSystem } from "./lib";
+import { SliceMachineActions } from "./createSliceMachineActions";
+import { SliceMachineContext } from "./createSliceMachineContext";
+import { UseHooksReturnType } from "./lib";
+import { SliceMachineHookExtraArgs, SliceMachineHooks } from "./types";
 
 /**
  * Slice Machine plugin definition.
@@ -26,9 +25,11 @@ export type SliceMachinePlugin<
 	 * Plugin setup.
 	 */
 	setup: (
-		actions: SliceMachineActions & {
-			hook: HookSystem<SliceMachineHooks>["hook"];
-		},
+		actions: SliceMachineActions &
+			UseHooksReturnType<
+				SliceMachineHooks,
+				SliceMachineHookExtraArgs<TPluginOptions>
+			>,
 		context: SliceMachineContext<TPluginOptions>,
 	) => void | Promise<void>;
 };

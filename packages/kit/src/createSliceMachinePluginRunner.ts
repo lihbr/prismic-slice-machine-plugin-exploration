@@ -1,19 +1,17 @@
 import defu from "defu";
 
 import { HookSystem } from "./lib";
-import { createSliceMachineActions } from "./SliceMachineActions";
-import { createSliceMachineContext } from "./SliceMachineContext";
-import {
-	createSliceMachineHookSystem,
-	SliceMachineHookNames,
-	SliceMachineHooks,
-} from "./createSliceMachineHookSystem";
+import { createSliceMachineActions } from "./createSliceMachineActions";
+import { createSliceMachineContext } from "./createSliceMachineContext";
 import {
 	LoadedSliceMachinePlugin,
 	SliceMachinePlugin,
-} from "./SliceMachinePlugin";
+} from "./defineSliceMachinePlugin";
 import {
 	SliceMachineConfigPluginRegistration,
+	SliceMachineHookExtraArgs,
+	SliceMachineHookNames,
+	SliceMachineHooks,
 	SliceMachineProject,
 } from "./types";
 
@@ -75,27 +73,27 @@ export class SliceMachinePluginRunner {
 			plugin,
 		);
 		const context = createSliceMachineContext(this._project, plugin);
-		// const hookHelpers = this._hookSystem.useHooks(
-		// 	plugin.type,
-		// 	plugin.resolve,
-		// 	actions,
-		// 	context,
-		// );
+		const hookSystemScope =
+			this._hookSystem.createScope<SliceMachineHookExtraArgs>(
+				// plugin.type,
+				plugin.resolve,
+				[actions, context],
+			);
 
 		// Run plugin setup with actions and context
 		await plugin.setup(
 			{
 				...actions,
-				hook: this._hookSystem.hook.bind(this._hookSystem),
-				// ...hookHelpers,
+				hook: hookSystemScope.hook,
+				unhook: hookSystemScope.unhook,
 			},
 			context,
 		);
 	}
 
-	private _validateAdapter(plugin: LoadedSliceMachinePlugin): void {
-		const hooks = this._hookSystem.hooksForOwner(plugin.resolve);
-		const hookNames = hooks.map((hook) => hook.name);
+	private _validateAdapter(adapter: LoadedSliceMachinePlugin): void {
+		const hooks = this._hookSystem.hooksForOwner(adapter.resolve);
+		const hookNames = hooks.map((hook) => hook.meta.name);
 
 		const missingHooks = REQUIRED_ADAPTER_HOOKS.filter(
 			(requiredHookName) => !hookNames.includes(requiredHookName),
@@ -103,7 +101,7 @@ export class SliceMachinePluginRunner {
 
 		if (missingHooks.length) {
 			throw new Error(
-				`Adapter \`${plugin.resolve}\` is missing hooks: \`${missingHooks.join(
+				`Adapter \`${adapter.resolve}\` is missing hooks: \`${missingHooks.join(
 					"`, `",
 				)}\``,
 			);
@@ -111,17 +109,16 @@ export class SliceMachinePluginRunner {
 	}
 
 	async init(): Promise<void> {
-		const [adapter, ...plugins] = await Promise.all([
-			this._loadPlugin(this._project.config.adapter),
-			...(this._project.config.plugins ?? []).map((pluginRegistration) =>
-				this._loadPlugin(pluginRegistration),
-			),
-		]);
+		const [adapter, ...plugins] = await Promise.all(
+			[
+				this._project.config.adapter,
+				...(this._project.config.plugins ?? []),
+			].map((pluginRegistration) => this._loadPlugin(pluginRegistration)),
+		);
 
-		await Promise.all([
-			this._setupPlugin(adapter),
-			...plugins.map((plugin) => this._setupPlugin(plugin)),
-		]);
+		await Promise.all(
+			[adapter, ...plugins].map((plugin) => this._setupPlugin(plugin)),
+		);
 
 		this._validateAdapter(adapter);
 	}
@@ -135,37 +132,4 @@ export const createSliceMachinePluginRunner = (
 	hookSystem: HookSystem<SliceMachineHooks>,
 ): SliceMachinePluginRunner => {
 	return new SliceMachinePluginRunner(project, hookSystem);
-};
-
-const app = async () => {
-	const project: SliceMachineProject = {
-		root: "/tmp/",
-		config: {
-			_latest: "0.0.0",
-			adapter: "@slicemachine/adapter-next",
-			apiEndpoint: "https://qwerty.cdn.prismic.io/api/v2",
-		},
-	};
-
-	const actions = {
-		readSlice: async (sliceLibraryID: string, id: string) => {
-			const x = await hookSystem.callHook(
-				"slice:read",
-				{ sliceLibraryID, id },
-				actions,
-				{},
-			);
-
-			return x;
-		},
-	};
-
-	const hookSystem = createSliceMachineHookSystem();
-	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem, {
-		actions,
-	});
-
-	await pluginRunner.init();
-
-	hookSystem.callHook("slice:create");
 };

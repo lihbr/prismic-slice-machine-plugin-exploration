@@ -1,4 +1,4 @@
-import { LoadedSliceMachinePlugin } from "./SliceMachinePlugin";
+import { LoadedSliceMachinePlugin } from "./defineSliceMachinePlugin";
 import { SliceMachineProject } from "./types";
 
 /**

@@ -29,29 +29,29 @@ export type WithExtraArgs<
 /**
  * Extends hooks with extra args.
  */
-type HooksFnsWithExtraArgs<
+type HookFnsWithExtraArgs<
 	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
 	TExtraArgs extends unknown[] = never[],
 > = {
 	[K in keyof THookFns]: WithExtraArgs<THookFns[K], TExtraArgs>;
 };
 
-// /**
-//  * Defines the return type of the {@link HookSystem.withExtraArgs} functions.
-//  */
-// export type UseHooksReturnType<
-// 	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
-// 	TExtraArgs extends unknown[] = never[],
-// > = {
-// 	hook: <TName extends keyof THookFns>(
-// 		owner: string,
-// 		name: TName,
-// 		hook: WithExtraArgs<THookFns[TName], TExtraArgs>,
-// 	) => void;
-// 	unhook: HookSystem<HooksWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
-// 	callHook: HookSystem<THookFns>["callHook"];
-// 	hooksForOwner: HookSystem<THookFns>["hooksForOwner"];
-// };
+/**
+ * Defines the return type of the {@link HookSystem.withExtraArgs} functions.
+ */
+export type CreateScopeReturnType<
+	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
+	TExtraArgs extends unknown[] = never[],
+> = {
+	hook: <TName extends Extract<keyof THookFns, string>>(
+		name: TName,
+		hook: WithExtraArgs<THookFns[TName], TExtraArgs>,
+		meta?: Partial<RegisteredHookMeta>,
+	) => void;
+	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
+	// callHook: HookSystem<THookFns>["callHook"];
+	// hooksForOwner: HookSystem<THookFns>["hooksForOwner"];
+};
 
 type RegisteredHookMeta = {
 	name: string;
@@ -82,7 +82,7 @@ export class HookSystem<
 		owner: string,
 		name: TName,
 		hookFn: THookFns[TName],
-		meta: Record<string, unknown> = {},
+		meta: Partial<RegisteredHookMeta> = {},
 	): void {
 		if (!this.registeredHooks[name]) {
 			this.registeredHooks[name] = [];
@@ -92,8 +92,8 @@ export class HookSystem<
 		this.registeredHooks[name]!.push({
 			fn: hookFn,
 			meta: {
-				owner,
 				...meta,
+				owner,
 				name,
 			},
 		});
@@ -105,11 +105,7 @@ export class HookSystem<
 	): void {
 		this.registeredHooks[name] = this.registeredHooks[name]?.filter(
 			(registeredHook) => {
-				if (registeredHook.meta.external) {
-					return registeredHook.meta.external !== hookFn;
-				} else {
-					registeredHook.fn !== hookFn;
-				}
+				registeredHook.fn !== hookFn;
 			},
 		);
 	}
@@ -147,33 +143,79 @@ export class HookSystem<
 	}
 
 	/**
-	 * Additional arguments can be passed to the hooks.
+	 * Use hook system as a user from given group. Additional arguments can be
+	 * passed to the hooks.
 	 *
 	 * @param extraArgs - Any additional arguments to pass to the hooks used.
 	 *
 	 * @returns `hook`, `unHook`, and `callHook` functions for the group.
 	 */
-	cloneWithExtraHookArgs<TExtraArgs extends unknown[] = never[]>(
-		extraArgs: TExtraArgs,
-	): HookSystem<THookFns> {
-		const newSystem = new HookSystem<THookFns>();
+	createScope<TExtraArgs extends unknown[] = never[]>(
+		owner: string,
+		extraArgs: [...TExtraArgs],
+	): CreateScopeReturnType<THookFns, TExtraArgs> {
+		return {
+			hook: <TName extends Extract<keyof THookFns, string>>(
+				name: TName,
+				hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
+			): void => {
+				const internalHook = ((...args: Parameters<THookFns[TName]>) => {
+					return hookFn(...args, ...extraArgs);
+				}) as THookFns[TName];
 
-		for (const hookName in this.registeredHooks) {
-			const registeredHooks = this.registeredHooks[hookName] ?? [];
-
-			for (const registeredHook of registeredHooks) {
-				const hookWithExtraArgs = ((
-					...args: Parameters<THookFns[typeof hookName]>
-				) => {
-					return registeredHook.fn(...args, ...extraArgs);
-				}) as THookFns[typeof hookName];
-
-				newSystem.hook(registeredHook.meta.owner, hookName, hookWithExtraArgs, {
-					external: registeredHook.fn,
+				return this.hook(owner, name, internalHook, {
+					external: hookFn,
 				});
-			}
-		}
-
-		return newSystem;
+			},
+			unhook: (name, hookFn) => {
+				this.registeredHooks[name] = this.registeredHooks[name]?.filter(
+					(registeredHook) => {
+						registeredHook.meta.external !== hookFn;
+					},
+				);
+			},
+		};
 	}
+
+	// createCallHookScope<TExtraArgs extends unknown[] = never[]>(
+	// 	extraArgs: TExtraArgs,
+	// ) {
+	// 	return <TName extends Extract<keyof THookFns, string>>(
+	// 		name: TName,
+	// 		...args: Parameters<THookFns[TName]>
+	// 	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> => {
+	// 		return this.callHook(name, ...args, ...extraArgs);
+	// 	};
+	// }
+
+	// /**
+	//  * Additional arguments can be passed to the hooks.
+	//  *
+	//  * @param extraArgs - Any additional arguments to pass to the hooks used.
+	//  *
+	//  * @returns `hook`, `unHook`, and `callHook` functions for the group.
+	//  */
+	// cloneWithExtraHookArgs<TExtraArgs extends unknown[] = never[]>(
+	// 	extraArgs: TExtraArgs,
+	// ): HookSystem<THookFns> {
+	// 	const newSystem = new HookSystem<THookFns>();
+
+	// 	for (const hookName in this.registeredHooks) {
+	// 		const registeredHooks = this.registeredHooks[hookName] ?? [];
+
+	// 		for (const registeredHook of registeredHooks) {
+	// 			const hookWithExtraArgs = ((
+	// 				...args: Parameters<THookFns[typeof hookName]>
+	// 			) => {
+	// 				return registeredHook.fn(...args, ...extraArgs);
+	// 			}) as THookFns[typeof hookName];
+
+	// 			newSystem.hook(registeredHook.meta.owner, hookName, hookWithExtraArgs, {
+	// 				external: registeredHook.fn,
+	// 			});
+	// 		}
+	// 	}
+
+	// 	return newSystem;
+	// }
 }

@@ -1,16 +1,18 @@
 // Public (for plugin authors)
 
-export type { SliceMachinePlugin } from "./SliceMachinePlugin";
-export { defineSliceMachinePlugin } from "./SliceMachinePlugin";
+export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
+export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
 
-export type { SliceMachineHook } from "./createSliceMachineHookSystem";
-export type { SliceMachineActions } from "./SliceMachineActions";
-export type { SliceMachineContext } from "./SliceMachineContext";
+// export type { SliceMachineHook } from "./createSliceMachineHookSystem";
+export type { SliceMachineActions } from "./createSliceMachineActions";
+export type { SliceMachineContext } from "./createSliceMachineContext";
+
+export type { SliceMachineProject } from "./types";
 
 // Internal (for Slice Machine)
 
-export { createSliceMachineHookSystem as createSliceMachineHooks } from "./createSliceMachineHookSystem";
-export type { SliceMachineHooks } from "./createSliceMachineHookSystem";
+export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
+// export type { SliceMachineHooks } from "./createSliceMachineHookSystem";
 
-export { createSliceMachinePluginRunner } from "./SliceMachinePluginRunner";
-export type { SliceMachinePluginRunner } from "./SliceMachinePluginRunner";
+export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
