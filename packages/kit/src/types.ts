@@ -174,7 +174,7 @@ export type CustomTypeCreateHookData = {
 };
 export type CustomTypeCreateHookBase = SliceMachineHook<
 	CustomTypeCreateHookData,
-	prismicT.CustomTypeModel
+	void
 >;
 export type CustomTypeCreateHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -189,7 +189,7 @@ export type CustomTypeUpdateHookData = {
 };
 export type CustomTypeUpdateHookBase = SliceMachineHook<
 	CustomTypeUpdateHookData,
-	prismicT.CustomTypeModel
+	void
 >;
 export type CustomTypeUpdateHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -204,7 +204,7 @@ export type CustomTypeDeleteHookData = {
 };
 export type CustomTypeDeleteHookBase = SliceMachineHook<
 	CustomTypeDeleteHookData,
-	prismicT.CustomTypeModel
+	void
 >;
 export type CustomTypeDeleteHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
