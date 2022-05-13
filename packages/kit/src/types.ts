@@ -6,6 +6,8 @@ import * as prismicT from "@prismicio/types";
 import { SliceMachineActions } from "./createSliceMachineActions";
 import { SliceMachineContext } from "./createSliceMachineContext";
 
+type Promisable<T> = T | PromiseLike<T>;
+
 export type PluginOptions = Record<string, unknown>;
 
 /**
@@ -49,7 +51,7 @@ export type SliceLibrary = {
 
 export type SliceMachineHook<TData, TReturn> = (
 	data: TData,
-) => TReturn | Promise<TReturn>;
+) => Promisable<TReturn>;
 
 export type SliceMachineHookExtraArgs<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -287,14 +289,28 @@ export type LibraryReadHook<
 // ## slice-simulator:setup:read
 // ============================================================================
 
-export const SliceSimulatorSetupStepStatus = {
-	Incomplete: "Incomplete",
-	PartiallyComplete: "PartiallyComplete",
-	Complete: "Complete",
+// const SliceSimulatorSetupStepStatus = {
+// 	Incomplete: "Incomplete",
+// 	PartiallyComplete: "PartiallyComplete",
+// 	Complete: "Complete",
+// } as const;
+export const SliceSimulatorSetupStepValidationMessageType = {
+	Error: "Error",
+	Warning: "Warning",
 } as const;
+export type SliceSimulatorSetupStepValidationMessage = {
+	type: typeof SliceSimulatorSetupStepValidationMessageType[keyof typeof SliceSimulatorSetupStepValidationMessageType];
+	title: string;
+	message: string;
+};
 export type SliceSimulatorSetupStep = {
+	title: string;
 	body: string;
-	getStatus: () => typeof SliceSimulatorSetupStepStatus[keyof typeof SliceSimulatorSetupStepStatus];
+	validate?: () => Promisable<
+		| SliceSimulatorSetupStepValidationMessage
+		| SliceSimulatorSetupStepValidationMessage[]
+		| void
+	>;
 };
 export type SliceSimulatorSetupReadHookReturnType = SliceSimulatorSetupStep[];
 export type SliceSimulatorSetupReadHookBase = SliceMachineHook<

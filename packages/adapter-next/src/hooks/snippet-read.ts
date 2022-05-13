@@ -1,7 +1,6 @@
 import type { SnippetReadHook } from "@slicemachine/plugin-kit";
 import * as prismicT from "@prismicio/types";
-
-import { noopTag as tsx } from "../lib/noopTag";
+import { stripIndent } from "common-tags";
 
 import type { PluginOptions } from "../types";
 
@@ -20,7 +19,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 
 	switch (data.model.type) {
 		case prismicT.CustomTypeModelFieldType.Link: {
-			const code = await actions.format(tsx`
+			const code = await actions.format(stripIndent`
 				<PrismicLink field={${dotPath(fieldPath)}}>Link</PrismicLink>
 			`);
 
@@ -32,7 +31,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 		}
 
 		case prismicT.CustomTypeModelFieldType.Group: {
-			const code = await actions.format(tsx`
+			const code = await actions.format(stripIndent`
 				${dotPath(fieldPath)}.map(item => (
 				  // Render content for item
 				))
@@ -46,7 +45,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 		}
 
 		case prismicT.CustomTypeModelFieldType.Slices: {
-			const code = await actions.format(tsx`
+			const code = await actions.format(stripIndent`
 				<SliceZone
 				  slices={${dotPath(fieldPath)}}
 				  components={components}

@@ -2,13 +2,13 @@ import {
 	SliceMachineActions,
 	SliceMachineContext,
 } from "@slicemachine/plugin-kit";
+import { stripIndent } from "common-tags";
 import { createRequire } from "node:module";
 import semver from "semver";
 
 import { PluginOptions } from "../types";
 
 import { pascalCase } from "./pascalCase";
-import { noopTag as typescript } from "./noopTag";
 
 type BuildSliceLibraryIndexFileContentsArgs = {
 	libraryID: string;
@@ -34,7 +34,7 @@ export const buildSliceLibraryIndexFileContents = async (
 	let contents: string;
 
 	if (isReactLazyCompatible) {
-		contents = typescript`
+		contents = stripIndent`
 			import * as React from 'react'
 
 			export const components = {
@@ -44,7 +44,7 @@ export const buildSliceLibraryIndexFileContents = async (
 			}
 		`;
 	} else {
-		contents = typescript`
+		contents = stripIndent`
 			import dynamic from 'next/dynamic'
 
 			export const components = {

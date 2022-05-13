@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@slicemachine/plugin-kit": "^0.0.0",
+		"common-tags": "^1.8.2",
 		"pascal-case": "^3.1.2",
 		"prismic-ts-codegen": "^0.0.2",
 		"semver": "^7.3.7"
@@ -48,6 +49,7 @@
 	"devDependencies": {
 		"@prismicio/mock": "^0.0.10",
 		"@prismicio/types": "^0.1.27",
+		"@types/common-tags": "^1.8.1",
 		"@types/mock-fs": "^4.13.1",
 		"@types/semver": "^7.3.9",
 		"c8": "^7.11.2",

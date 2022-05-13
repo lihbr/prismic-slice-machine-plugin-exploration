@@ -5,11 +5,12 @@ import type {
 	SliceMachineContext,
 } from "@slicemachine/plugin-kit";
 import { generateTypes } from "prismic-ts-codegen";
+import { stripIndent } from "common-tags";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { buildSliceLibraryIndexFileContents } from "../lib/buildSliceLibraryIndexFileContents";
-import { noopTag as tsx } from "../lib/noopTag";
+import { getJSOrTSXFileExtension } from "../lib/getJSOrTSXFileExtension";
 import { pascalCase } from "../lib/pascalCase";
 
 import type { PluginOptions } from "../types";
@@ -36,9 +37,7 @@ const createModelFile = async ({ dir, data, actions, context }: Args) => {
 const createComponentFile = async ({ dir, data, actions, context }: Args) => {
 	const filePath = path.join(
 		dir,
-		context.options.typescript
-			? "index.tsx"
-			: `index.${context.options.jsxExtension ? "jsx" : "js"}`,
+		`index.${getJSOrTSXFileExtension(context.options)}`,
 	);
 	const model = data.model;
 	const pascalID = pascalCase(model.id);
@@ -46,7 +45,7 @@ const createComponentFile = async ({ dir, data, actions, context }: Args) => {
 	let contents: string;
 
 	if (context.options.typescript) {
-		contents = tsx`
+		contents = stripIndent`
 			import { SliceComponentProps } from "@prismicio/react";
 			import { ${pascalID}Slice } from "./types";
 
@@ -72,7 +71,7 @@ const createComponentFile = async ({ dir, data, actions, context }: Args) => {
 			export default ${pascalID}
 		`;
 	} else {
-		contents = tsx`
+		contents = stripIndent`
 			/**
 			 * @typedef {import("./types").${pascalID}Slice} ${pascalID}Slice
 			 *

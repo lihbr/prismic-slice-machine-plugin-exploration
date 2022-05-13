@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import * as prismicT from "@prismicio/types";
+import * as fs from "node:fs/promises";
 
 import prettier from "prettier";
 import stripIndent from "strip-indent";
@@ -30,6 +31,7 @@ type NotifyArgs = {
  * Slice Machine actions shared to plugins and hooks.
  */
 export type SliceMachineActions = {
+	getProject(): Promise<SliceMachineProject>;
 	joinPathFromRoot(...paths: string[]): string;
 	format(
 		source: string,
@@ -54,6 +56,17 @@ export const createSliceMachineActions = (
 	_plugin: LoadedSliceMachinePlugin,
 ): SliceMachineActions => {
 	return {
+		getProject: async () => {
+			const configFilePath = join(project.root, "sm.json");
+			const configContents = await fs.readFile(configFilePath, "utf8");
+			const config = JSON.parse(configContents);
+
+			return {
+				...project,
+				config,
+			};
+		},
+
 		joinPathFromRoot: (...paths) => {
 			return join(project.root, ...paths);
 		},
