@@ -1,7 +1,6 @@
 import defu from "defu";
 
 import { HookSystem } from "./lib";
-import { createSliceMachineActions } from "./createSliceMachineActions";
 import { createSliceMachineContext } from "./createSliceMachineContext";
 import {
 	LoadedSliceMachinePlugin,
@@ -71,17 +70,16 @@ export class SliceMachinePluginRunner {
 		plugin: LoadedSliceMachinePlugin,
 		as: "adapter" | "plugin",
 	): Promise<void> {
-		const actions = createSliceMachineActions(
+		const context = createSliceMachineContext(
 			this._project,
 			this._hookSystem,
 			plugin,
 		);
-		const context = createSliceMachineContext(this._project, plugin);
 		const hookSystemScope =
 			this._hookSystem.createScope<SliceMachineHookExtraArgs>(
 				// plugin.type,
 				plugin.resolve,
-				[actions, context],
+				[context],
 			);
 
 		// Prevent plugins from hooking to adapter only hooks
@@ -97,14 +95,14 @@ export class SliceMachinePluginRunner {
 				  };
 
 		// Run plugin setup with actions and context
-		await plugin.setup(
-			{
-				...actions,
+		await plugin.setup({
+			...context,
+			actions: {
+				...context.actions,
 				hook,
 				unhook: hookSystemScope.unhook,
 			},
-			context,
-		);
+		});
 	}
 
 	private _validateAdapter(adapter: LoadedSliceMachinePlugin): void {
