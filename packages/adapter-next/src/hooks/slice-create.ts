@@ -1,7 +1,6 @@
 import type {
 	SliceCreateHook,
 	SliceCreateHookData,
-	SliceMachineActions,
 	SliceMachineContext,
 } from "@slicemachine/plugin-kit";
 import { generateTypes } from "prismic-ts-codegen";
@@ -18,33 +17,28 @@ import type { PluginOptions } from "../types";
 type Args = {
 	dir: string;
 	data: SliceCreateHookData;
-	actions: SliceMachineActions;
-	context: SliceMachineContext<PluginOptions>;
-};
+} & SliceMachineContext<PluginOptions>;
 
-const createModelFile = async ({ dir, data, actions, context }: Args) => {
+const createModelFile = async ({ dir, data, helpers, options }: Args) => {
 	const filePath = path.join(dir, "model.json");
 
 	let contents = JSON.stringify(data.model);
 
-	if (context.options.format) {
-		contents = await actions.format(contents, filePath);
+	if (options.format) {
+		contents = await helpers.format(contents, filePath);
 	}
 
 	await fs.writeFile(filePath, contents);
 };
 
-const createComponentFile = async ({ dir, data, actions, context }: Args) => {
-	const filePath = path.join(
-		dir,
-		`index.${getJSOrTSXFileExtension(context.options)}`,
-	);
+const createComponentFile = async ({ dir, data, helpers, options }: Args) => {
+	const filePath = path.join(dir, `index.${getJSOrTSXFileExtension(options)}`);
 	const model = data.model;
 	const pascalID = pascalCase(model.id);
 
 	let contents: string;
 
-	if (context.options.typescript) {
+	if (options.typescript) {
 		contents = stripIndent`
 			import { SliceComponentProps } from "@prismicio/react";
 			import { ${pascalID}Slice } from "./types";
@@ -96,22 +90,22 @@ const createComponentFile = async ({ dir, data, actions, context }: Args) => {
 		`;
 	}
 
-	if (context.options.format) {
-		contents = await actions.format(contents, filePath);
+	if (options.format) {
+		contents = await helpers.format(contents, filePath);
 	}
 
 	await fs.writeFile(filePath, contents);
 };
 
-const createTypesFile = async ({ dir, data, actions, context }: Args) => {
+const createTypesFile = async ({ dir, data, helpers, options }: Args) => {
 	const filePath = path.join(dir, "types.ts");
 
 	let contents = generateTypes({
 		sharedSliceModels: [data.model],
 	});
 
-	if (context.options.format) {
-		contents = await actions.format(contents, filePath);
+	if (options.format) {
+		contents = await helpers.format(contents, filePath);
 	}
 
 	await fs.writeFile(filePath, contents);
@@ -120,12 +114,16 @@ const createTypesFile = async ({ dir, data, actions, context }: Args) => {
 const upsertSliceLibraryIndexFile = async ({
 	data,
 	actions,
-	context,
+	helpers,
+	project,
+	options,
 }: Omit<Args, "dir">) => {
 	const { filePath, contents } = await buildSliceLibraryIndexFileContents({
 		libraryID: data.libraryID,
-		actions: actions,
-		context: context,
+		actions,
+		helpers,
+		project,
+		options,
 	});
 
 	await fs.writeFile(filePath, contents);
@@ -133,17 +131,16 @@ const upsertSliceLibraryIndexFile = async ({
 
 export const sliceCreate: SliceCreateHook<PluginOptions> = async (
 	data,
-	actions,
 	context,
 ) => {
-	const dir = actions.joinPathFromRoot(data.libraryID, data.model.id);
+	const dir = context.helpers.joinPathFromRoot(data.libraryID, data.model.id);
 
 	await fs.mkdir(dir, { recursive: true });
 
 	await Promise.allSettled([
-		createModelFile({ dir, data, actions, context }),
-		createComponentFile({ dir, data, actions, context }),
-		createTypesFile({ dir, data, actions, context }),
-		upsertSliceLibraryIndexFile({ data, actions, context }),
+		createModelFile({ dir, data, ...context }),
+		createComponentFile({ dir, data, ...context }),
+		createTypesFile({ dir, data, ...context }),
+		upsertSliceLibraryIndexFile({ data, ...context }),
 	]);
 };

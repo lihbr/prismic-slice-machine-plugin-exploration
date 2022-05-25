@@ -10,8 +10,7 @@ const dotPath = (segments: string[]): string => {
 
 export const snippetRead: SnippetReadHook<PluginOptions> = async (
 	data,
-	actions,
-	_context,
+	{ helpers },
 ) => {
 	const { fieldPath } = data;
 
@@ -19,7 +18,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 
 	switch (data.model.type) {
 		case prismicT.CustomTypeModelFieldType.Link: {
-			const code = await actions.format(stripIndent`
+			const code = await helpers.format(stripIndent`
 				<PrismicLink field={${dotPath(fieldPath)}}>Link</PrismicLink>
 			`);
 
@@ -31,7 +30,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 		}
 
 		case prismicT.CustomTypeModelFieldType.Group: {
-			const code = await actions.format(stripIndent`
+			const code = await helpers.format(stripIndent`
 				${dotPath(fieldPath)}.map(item => (
 				  // Render content for item
 				))
@@ -45,7 +44,7 @@ export const snippetRead: SnippetReadHook<PluginOptions> = async (
 		}
 
 		case prismicT.CustomTypeModelFieldType.Slices: {
-			const code = await actions.format(stripIndent`
+			const code = await helpers.format(stripIndent`
 				<SliceZone
 				  slices={${dotPath(fieldPath)}}
 				  components={components}
