@@ -24,16 +24,14 @@ export type SliceMachinePlugin<
 	 * Plugin setup.
 	 */
 	setup: (
-		context: Omit<SliceMachineContext<TPluginOptions>, "actions"> & {
-			actions: SliceMachineContext<TPluginOptions>["actions"] &
-				Pick<
-					CreateScopeReturnType<
-						SliceMachineHooks,
-						SliceMachineHookExtraArgs<TPluginOptions>
-					>,
-					"hook" | "unhook"
-				>;
-		},
+		context: Omit<SliceMachineContext<TPluginOptions>, "actions"> &
+			Pick<
+				CreateScopeReturnType<
+					SliceMachineHooks,
+					SliceMachineHookExtraArgs<TPluginOptions>
+				>,
+				"hook" | "unhook"
+			>,
 	) => void | Promise<void>;
 };
 

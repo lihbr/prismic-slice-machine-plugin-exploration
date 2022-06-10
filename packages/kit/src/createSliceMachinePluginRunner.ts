@@ -97,11 +97,8 @@ export class SliceMachinePluginRunner {
 		// Run plugin setup with actions and context
 		await plugin.setup({
 			...context,
-			actions: {
-				...context.actions,
-				hook,
-				unhook: hookSystemScope.unhook,
-			},
+			hook,
+			unhook: hookSystemScope.unhook,
 		});
 	}
 

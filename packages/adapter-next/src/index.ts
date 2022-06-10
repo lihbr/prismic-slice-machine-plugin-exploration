@@ -21,7 +21,7 @@ export default defineSliceMachinePlugin<PluginOptions>({
 	defaultOptions: {
 		format: true,
 	},
-	setup({ actions: { hook } }) {
+	setup({ hook }) {
 		hook("slice:create", sliceCreate);
 		hook("slice:update", sliceUpdate);
 		hook("slice:delete", sliceDelete);

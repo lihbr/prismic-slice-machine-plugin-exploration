@@ -10,10 +10,10 @@ export default defineSliceMachinePlugin<NuxtPluginOptions>({
 	meta: {
 		name: pkgName,
 	},
-	setup({ actions, options }) {
+	setup({ hook, options }) {
 		// Just trying types...
 		if (options.typescript) {
-			actions.hook("slice:create", (_data, { actions, options }) => {
+			hook("slice:create", (_data, { actions, options }) => {
 				if (options.typescript) {
 					actions.notify({
 						type: "info",
