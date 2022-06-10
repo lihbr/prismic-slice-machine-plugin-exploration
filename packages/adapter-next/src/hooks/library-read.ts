@@ -21,10 +21,9 @@ const isSharedSliceModel = (
 
 export const libraryRead: LibraryReadHook<PluginOptions> = async (
 	data,
-	actions,
-	_context,
+	{ helpers },
 ) => {
-	const dirPath = actions.joinPathFromRoot(data.id);
+	const dirPath = helpers.joinPathFromRoot(data.libraryID);
 
 	let metadata: SliceLibraryMetadata = {};
 	try {
@@ -55,7 +54,7 @@ export const libraryRead: LibraryReadHook<PluginOptions> = async (
 	);
 
 	return {
-		id: data.id,
+		id: data.libraryID,
 		name: metadata.name,
 		sliceIDs,
 	};

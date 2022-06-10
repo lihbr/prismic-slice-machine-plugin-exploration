@@ -1,5 +1,4 @@
 import type {
-	SliceMachineActions,
 	SliceMachineContext,
 	SliceSimulatorSetupReadHook,
 	SliceSimulatorSetupStep,
@@ -20,15 +19,12 @@ const REQUIRED_DEPENDENCIES = [
 	"@prismicio/helpers",
 ];
 
-type Args = {
-	actions: SliceMachineActions;
-	context: SliceMachineContext<PluginOptions>;
-};
+type Args = SliceMachineContext<PluginOptions>;
 
 const createStep1 = async ({
-	context,
+	project,
 }: Args): Promise<SliceSimulatorSetupStep> => {
-	const require = createRequire(context.project.root);
+	const require = createRequire(project.root);
 
 	return {
 		title: "Install packages",
@@ -82,15 +78,15 @@ const createStep1 = async ({
 };
 
 const createStep2 = async ({
-	actions,
-	context,
+	helpers,
+	options,
 }: Args): Promise<SliceSimulatorSetupStep> => {
 	const fileName = `slice-simulator.${getJSOrTSXFileExtension}`;
-	const filePath = actions.joinPathFromRoot("pages", fileName);
+	const filePath = helpers.joinPathFromRoot("pages", fileName);
 
 	let fileContents: string;
 
-	if (context.options.typescript) {
+	if (options.typescript) {
 		fileContents = stripIndent`
 			import { GetStaticProps } from "next/types";
 			import { SliceSimulator } from "@prismicio/slice-simulator-react";
@@ -145,7 +141,7 @@ const createStep2 = async ({
 		`;
 	}
 
-	fileContents = await actions.format(fileContents, filePath);
+	fileContents = await helpers.format(fileContents, filePath);
 
 	return {
 		title: "Create a page for the simulator",
@@ -160,10 +156,10 @@ const createStep2 = async ({
 };
 
 const createStep3 = async ({
-	actions,
+	helpers,
 }: Args): Promise<SliceSimulatorSetupStep> => {
-	const filePath = actions.joinPathFromRoot("sm.json");
-	const fileContents = await actions.format(
+	const filePath = helpers.joinPathFromRoot("sm.json");
+	const fileContents = await helpers.format(
 		`
 			{
 				"localSliceSimulatorURL": "http://localhost:3000/slice-simulator"
@@ -182,7 +178,7 @@ const createStep3 = async ({
 			~~~
 		`,
 		validate: async () => {
-			const project = await actions.getProject();
+			const project = await helpers.getProject();
 
 			if (!("localSliceSimulatorURL" in project.config)) {
 				return {
@@ -239,10 +235,10 @@ const createStep3 = async ({
 
 export const sliceSimulatorSetupRead: SliceSimulatorSetupReadHook<
 	PluginOptions
-> = async (_data, actions, context) => {
+> = async (_data, context) => {
 	return Promise.all([
-		createStep1({ actions, context }),
-		createStep2({ actions, context }),
-		createStep3({ actions, context }),
+		createStep1(context),
+		createStep2(context),
+		createStep3(context),
 	]);
 };

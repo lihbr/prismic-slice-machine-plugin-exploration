@@ -1,5 +1,4 @@
 import { CreateScopeReturnType } from "./lib";
-import { SliceMachineActions } from "./createSliceMachineActions";
 import { SliceMachineContext } from "./createSliceMachineContext";
 import { SliceMachineHookExtraArgs, SliceMachineHooks } from "./types";
 
@@ -25,7 +24,7 @@ export type SliceMachinePlugin<
 	 * Plugin setup.
 	 */
 	setup: (
-		actions: SliceMachineActions &
+		context: Omit<SliceMachineContext<TPluginOptions>, "actions"> &
 			Pick<
 				CreateScopeReturnType<
 					SliceMachineHooks,
@@ -33,7 +32,6 @@ export type SliceMachinePlugin<
 				>,
 				"hook" | "unhook"
 			>,
-		context: SliceMachineContext<TPluginOptions>,
 	) => void | Promise<void>;
 };
 

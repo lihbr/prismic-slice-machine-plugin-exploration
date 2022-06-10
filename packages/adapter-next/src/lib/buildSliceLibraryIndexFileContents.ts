@@ -1,7 +1,4 @@
-import {
-	SliceMachineActions,
-	SliceMachineContext,
-} from "@slicemachine/plugin-kit";
+import { SliceMachineContext } from "@slicemachine/plugin-kit";
 import { stripIndent } from "common-tags";
 import { createRequire } from "node:module";
 import semver from "semver";
@@ -12,21 +9,19 @@ import { pascalCase } from "./pascalCase";
 
 type BuildSliceLibraryIndexFileContentsArgs = {
 	libraryID: string;
-	actions: SliceMachineActions;
-	context: SliceMachineContext<PluginOptions>;
-};
+} & SliceMachineContext<PluginOptions>;
 
 export const buildSliceLibraryIndexFileContents = async (
 	args: BuildSliceLibraryIndexFileContentsArgs,
 ): Promise<{ filePath: string; contents: string }> => {
-	const filePath = args.actions.joinPathFromRoot(
+	const filePath = args.helpers.joinPathFromRoot(
 		args.libraryID,
-		args.context.options.typescript ? "index.ts" : "index.js",
+		args.options.typescript ? "index.ts" : "index.js",
 	);
 	const sliceLibrary = await args.actions.readLibrary({
 		libraryID: args.libraryID,
 	});
-	const require = createRequire(args.context.project.root);
+	const require = createRequire(args.project.root);
 	const isReactLazyCompatible =
 		semver.satisfies("18", require("react/package.json").version) &&
 		semver.satisfies("12", require("next/package.json").version);
@@ -55,8 +50,8 @@ export const buildSliceLibraryIndexFileContents = async (
 		`;
 	}
 
-	if (args.context.options.format) {
-		contents = await args.actions.format(contents, filePath);
+	if (args.options.format) {
+		contents = await args.helpers.format(contents, filePath);
 	}
 
 	return { filePath, contents };

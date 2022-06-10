@@ -4,6 +4,7 @@ export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
 
 export type { SliceMachineActions } from "./createSliceMachineActions";
+export type { SliceMachineHelpers } from "./createSliceMachineHelpers";
 export type { SliceMachineContext } from "./createSliceMachineContext";
 
 export {

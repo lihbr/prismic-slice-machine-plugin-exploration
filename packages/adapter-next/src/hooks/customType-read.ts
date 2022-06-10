@@ -7,10 +7,9 @@ import type { PluginOptions } from "../types";
 
 export const customTypeRead: CustomTypeReadHook<PluginOptions> = async (
 	data,
-	actions,
-	_context,
+	{ helpers },
 ) => {
-	const filePath = actions.joinPathFromRoot("customtypes", `${data.id}.json`);
+	const filePath = helpers.joinPathFromRoot("customtypes", `${data.id}.json`);
 
 	return await readJSONFile<prismicT.CustomTypeModel>(filePath);
 };
