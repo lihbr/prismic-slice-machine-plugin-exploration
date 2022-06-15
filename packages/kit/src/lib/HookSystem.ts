@@ -122,7 +122,7 @@ export class HookSystem<
 	async callHook<TName extends Extract<keyof THookFns, string>>(
 		name: TName,
 		...args: Parameters<THookFns[TName]>
-	): Promise<(Awaited<ReturnType<THookFns[TName]>> | HookSystemError)[]> {
+	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
 		const hooks = this._registeredHooks[name] ?? [];
 
 		const promises = hooks.map(async (hook) => {
