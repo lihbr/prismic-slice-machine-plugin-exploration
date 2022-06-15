@@ -58,6 +58,27 @@ type RegisteredHook<THookFn extends HookFn = HookFn> = {
 	meta: RegisteredHookMeta;
 };
 
+export class HookSystemError<TError = Error | unknown> extends Error {
+	hook: string;
+	owner: string;
+	rawMeta: RegisteredHookMeta;
+	rawCause: TError;
+
+	constructor(meta: RegisteredHookMeta, cause: TError) {
+		super(
+			`Error in \`${meta.owner}\` during \`${meta.name}\` hook: ${
+				cause instanceof Error ? cause.message : String(cause)
+			}`,
+			{ cause: cause instanceof Error ? cause : undefined },
+		);
+
+		this.hook = meta.name;
+		this.owner = meta.owner;
+		this.rawMeta = meta;
+		this.rawCause = cause;
+	}
+}
+
 /**
  * @internal
  */
@@ -101,11 +122,15 @@ export class HookSystem<
 	async callHook<TName extends Extract<keyof THookFns, string>>(
 		name: TName,
 		...args: Parameters<THookFns[TName]>
-	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
+	): Promise<(Awaited<ReturnType<THookFns[TName]>> | HookSystemError)[]> {
 		const hooks = this._registeredHooks[name] ?? [];
 
-		const promises = hooks.map((hook) => {
-			return hook.fn(...args) as ReturnType<THookFns[TName]>;
+		const promises = hooks.map(async (hook) => {
+			try {
+				return (await hook.fn(...args)) as ReturnType<THookFns[TName]>;
+			} catch (error) {
+				throw new HookSystemError(hook.meta, error);
+			}
 		});
 
 		return await Promise.all(promises);

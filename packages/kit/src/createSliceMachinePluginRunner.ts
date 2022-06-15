@@ -95,11 +95,24 @@ export class SliceMachinePluginRunner {
 				  };
 
 		// Run plugin setup with actions and context
-		await plugin.setup({
-			...context,
-			hook,
-			unhook: hookSystemScope.unhook,
-		});
+		try {
+			await plugin.setup({
+				...context,
+				hook,
+				unhook: hookSystemScope.unhook,
+			});
+		} catch (error) {
+			if (error instanceof Error) {
+				throw new Error(
+					`Plugin \`${plugin.resolve}\` errored during setup: ${error.message}`,
+					{ cause: error },
+				);
+			} else {
+				throw new Error(
+					`Plugin \`${plugin.resolve}\` errored during setup: ${error}`,
+				);
+			}
+		}
 	}
 
 	private _validateAdapter(adapter: LoadedSliceMachinePlugin): void {
