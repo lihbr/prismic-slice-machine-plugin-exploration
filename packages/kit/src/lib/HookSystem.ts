@@ -58,7 +58,7 @@ type RegisteredHook<THookFn extends HookFn = HookFn> = {
 	meta: RegisteredHookMeta;
 };
 
-export class HookSystemError<TError = Error | unknown> extends Error {
+export class HookError<TError = Error | unknown> extends Error {
 	hook: string;
 	owner: string;
 	rawMeta: RegisteredHookMeta;
@@ -122,18 +122,37 @@ export class HookSystem<
 	async callHook<TName extends Extract<keyof THookFns, string>>(
 		name: TName,
 		...args: Parameters<THookFns[TName]>
-	): Promise<Awaited<ReturnType<THookFns[TName]>>[]> {
+	): Promise<{
+		data: Awaited<ReturnType<THookFns[TName]>>[];
+		errors: HookError[];
+	}> {
 		const hooks = this._registeredHooks[name] ?? [];
 
 		const promises = hooks.map(async (hook) => {
 			try {
 				return (await hook.fn(...args)) as ReturnType<THookFns[TName]>;
 			} catch (error) {
-				throw new HookSystemError(hook.meta, error);
+				throw new HookError(hook.meta, error);
 			}
 		});
 
-		return await Promise.all(promises);
+		const settledPromises = await Promise.allSettled(promises);
+
+		return settledPromises.reduce<{
+			data: Awaited<ReturnType<THookFns[TName]>>[];
+			errors: HookError[];
+		}>(
+			(acc, settledPromise) => {
+				if (settledPromise.status === "fulfilled") {
+					acc.data.push(settledPromise.value);
+				} else {
+					acc.errors.push(settledPromise.reason);
+				}
+
+				return acc;
+			},
+			{ data: [], errors: [] },
+		);
 	}
 
 	/**

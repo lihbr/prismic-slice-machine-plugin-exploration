@@ -39,22 +39,35 @@ export const createSliceMachineActions = (
 ): SliceMachineActions => {
 	return {
 		readLibrary: async (args) => {
-			const [library] = await hookSystem.callHook("library:read", {
+			const {
+				data: [library],
+				errors: [cause],
+			} = await hookSystem.callHook("library:read", {
 				libraryID: args.libraryID,
 			});
+
+			if (!library) {
+				throw new Error(`Library \`${args.libraryID}\` not found.`, {
+					cause,
+				});
+			}
 
 			return library;
 		},
 
 		getSliceModel: async (args) => {
-			const [model] = await hookSystem.callHook("slice:read", {
+			const {
+				data: [model],
+				errors: [cause],
+			} = await hookSystem.callHook("slice:read", {
 				libraryID: args.libraryID,
 				sliceID: args.sliceID,
 			});
 
 			if (!model) {
 				throw new Error(
-					`A "${args.sliceID}" Slice does not exist in the "${args.libraryID}" library.`,
+					`Slice \`${args.sliceID}\` not found in the \`${args.libraryID}\` library.`,
+					{ cause },
 				);
 			}
 
