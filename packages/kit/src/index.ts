@@ -69,6 +69,8 @@ export type {
 	SliceSimulatorSetupStepValidationMessage,
 } from "./types";
 
+export { HookError } from "./lib";
+
 // Internal (for Slice Machine)
 
 export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
