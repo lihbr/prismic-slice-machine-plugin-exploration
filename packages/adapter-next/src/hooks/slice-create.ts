@@ -1,3 +1,4 @@
+import * as prismicT from "@prismicio/types";
 import type {
 	SliceCreateHook,
 	SliceCreateHookData,
@@ -101,7 +102,7 @@ const createTypesFile = async ({ dir, data, helpers, options }: Args) => {
 	const filePath = path.join(dir, "types.ts");
 
 	let contents = generateTypes({
-		sharedSliceModels: [data.model],
+		sharedSliceModels: [data.model as prismicT.SharedSliceModel],
 	});
 
 	if (options.format) {

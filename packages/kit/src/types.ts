@@ -1,7 +1,5 @@
-// TODO: This may need to be replaced with @prismicio/types-internal.
-//       Be aware of the implications of exposing @prismicio/types-internal as
-//       part of the public API; it would no longer be "internal."
 import * as prismicT from "@prismicio/types";
+import * as prismicTI from "@prismicio/types-internal";
 
 import { SliceMachineContext } from "./createSliceMachineContext";
 
@@ -41,6 +39,26 @@ export type SliceMachineProject = {
 export type SliceLibrary = {
 	id: string;
 };
+
+// ============================================================================
+// ## Internal and External Type Unions
+// ============================================================================
+
+export type SharedSliceModel =
+	| prismicT.SharedSliceModel
+	| prismicTI.CustomTypes.Widgets.Slices.SharedSlice;
+
+export type CustomTypeModel =
+	| prismicT.CustomTypeModel
+	| prismicTI.CustomTypes.CustomType;
+
+export type CustomTypeModelFieldForGroup =
+	| prismicT.CustomTypeModelFieldForGroup
+	| prismicTI.CustomTypes.Widgets.Nestable.NestableWidget;
+
+export type CustomTypeModelField =
+	| prismicT.CustomTypeModelField
+	| prismicTI.CustomTypes.Widgets.Widget.DynamicWidget;
 
 // ============================================================================
 //
@@ -114,7 +132,7 @@ export type SliceMachineHooks = {
 
 export type SliceCreateHookData = {
 	libraryID: string;
-	model: prismicT.SharedSliceModel;
+	model: SharedSliceModel;
 };
 export type SliceCreateHookBase = SliceMachineHook<SliceCreateHookData, void>;
 export type SliceCreateHook<
@@ -127,7 +145,7 @@ export type SliceCreateHook<
 
 export type SliceUpdateHookData = {
 	libraryID: string;
-	model: prismicT.SharedSliceModel;
+	model: SharedSliceModel;
 };
 export type SliceUpdateHookBase = SliceMachineHook<SliceUpdateHookData, void>;
 export type SliceUpdateHook<
@@ -140,7 +158,7 @@ export type SliceUpdateHook<
 
 export type SliceDeleteHookData = {
 	libraryID: string;
-	model: prismicT.SharedSliceModel;
+	model: SharedSliceModel;
 };
 export type SliceDeleteHookBase = SliceMachineHook<SliceDeleteHookData, void>;
 export type SliceDeleteHook<
@@ -157,7 +175,7 @@ export type SliceReadHookData = {
 };
 export type SliceReadHookBase = SliceMachineHook<
 	SliceReadHookData,
-	prismicT.SharedSliceModel
+	SharedSliceModel
 >;
 export type SliceReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -168,7 +186,7 @@ export type SliceReadHook<
 // ============================================================================
 
 export type CustomTypeCreateHookData = {
-	model: prismicT.CustomTypeModel;
+	model: CustomTypeModel;
 };
 export type CustomTypeCreateHookBase = SliceMachineHook<
 	CustomTypeCreateHookData,
@@ -183,7 +201,7 @@ export type CustomTypeCreateHook<
 // ============================================================================
 
 export type CustomTypeUpdateHookData = {
-	model: prismicT.CustomTypeModel;
+	model: CustomTypeModel;
 };
 export type CustomTypeUpdateHookBase = SliceMachineHook<
 	CustomTypeUpdateHookData,
@@ -198,7 +216,7 @@ export type CustomTypeUpdateHook<
 // ============================================================================
 
 export type CustomTypeDeleteHookData = {
-	model: prismicT.CustomTypeModel;
+	model: CustomTypeModel;
 };
 export type CustomTypeDeleteHookBase = SliceMachineHook<
 	CustomTypeDeleteHookData,
@@ -217,7 +235,7 @@ export type CustomTypeReadHookData = {
 };
 export type CustomTypeReadHookBase = SliceMachineHook<
 	CustomTypeReadHookData,
-	prismicT.CustomTypeModel
+	CustomTypeModel
 >;
 export type CustomTypeReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -237,13 +255,13 @@ export type SnippetReadHookData = {
 } & (
 	| {
 			rootModelType: typeof SnippetReadHookDataRootModelType.Slice;
-			rootModel: prismicT.SharedSliceModel;
-			model: prismicT.CustomTypeModelFieldForGroup;
+			rootModel: SharedSliceModel;
+			model: CustomTypeModelFieldForGroup;
 	  }
 	| {
 			rootModelType: typeof SnippetReadHookDataRootModelType.CustomType;
-			rootModel: prismicT.CustomTypeModel;
-			model: prismicT.CustomTypeModelField;
+			rootModel: CustomTypeModel;
+			model: CustomTypeModelField;
 	  }
 );
 export type SnippetDescriptor = {

@@ -1,7 +1,10 @@
-import * as prismicT from "@prismicio/types";
-
 import { HookSystem } from "./lib";
-import { SliceMachineProject, SliceMachineHooks, SliceLibrary } from "./types";
+import {
+	SliceMachineProject,
+	SliceMachineHooks,
+	SliceLibrary,
+	SharedSliceModel,
+} from "./types";
 
 type GetSliceModelArgs = {
 	libraryID: string;
@@ -21,7 +24,7 @@ type NotifyArgs = {
  * Slice Machine actions shared to plugins and hooks.
  */
 export type SliceMachineActions = {
-	getSliceModel(args: GetSliceModelArgs): Promise<prismicT.SharedSliceModel>;
+	getSliceModel(args: GetSliceModelArgs): Promise<SharedSliceModel>;
 	readLibrary(
 		args: ReadLibraryArgs,
 	): Promise<SliceLibrary & { sliceIDs: string[] }>;

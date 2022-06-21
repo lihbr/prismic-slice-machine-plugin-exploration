@@ -1,3 +1,4 @@
+import * as prismicT from "@prismicio/types";
 import type {
 	CustomTypeCreateHook,
 	CustomTypeCreateHookData,
@@ -31,7 +32,7 @@ const createTypesFile = async ({ dir, data, helpers, options }: Args) => {
 
 	// TODO: Figure out how to import Shared Slice types
 	let contents = generateTypes({
-		customTypeModels: [data.model],
+		customTypeModels: [data.model as prismicT.CustomTypeModel],
 	});
 
 	if (options.format) {
