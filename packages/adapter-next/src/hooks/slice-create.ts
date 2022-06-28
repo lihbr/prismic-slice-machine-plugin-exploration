@@ -75,7 +75,7 @@ const createComponentFile = async ({ dir, data, actions, context }: Args) => {
 			/**
 			 * @typedef {import("./types").${pascalID}Slice} ${pascalID}Slice
 			 *
-			 * @typedef {import("./SliceZone").SliceComponentProps<${pascalID}Slice>} ${pascalID}Props
+			 * @typedef {import("@prismicio/react").SliceComponentProps<${pascalID}Slice>} ${pascalID}Props
 			 */
 
 			/**
