@@ -5,10 +5,9 @@ import type { PluginOptions } from "../types";
 
 export const customTypeDelete: CustomTypeDeleteHook<PluginOptions> = async (
 	data,
-	actions,
-	_context,
+	{ helpers },
 ) => {
-	const dir = actions.joinPathFromRoot("customtypes", data.model.id);
+	const dir = helpers.joinPathFromRoot("customtypes", data.model.id);
 
 	await fs.rmdir(dir);
 };

@@ -7,10 +7,9 @@ import type { PluginOptions } from "../types";
 
 export const sliceRead: SliceReadHook<PluginOptions> = async (
 	data,
-	actions,
-	_context,
+	{ helpers },
 ) => {
-	const filePath = actions.joinPathFromRoot(
+	const filePath = helpers.joinPathFromRoot(
 		data.libraryID,
 		data.sliceID,
 		"model.json",

@@ -84,7 +84,7 @@ it("returns an empty array when no hook registered", async () => {
 
 	const result = await system.callHook("hook1");
 
-	expect(result).toStrictEqual([]);
+	expect(result).toStrictEqual({ data: [], errors: [] });
 });
 
 it("returns hook returned values in order", async () => {
@@ -100,7 +100,7 @@ it("returns hook returned values in order", async () => {
 
 	const result = await system.callHook("hook1");
 
-	expect(result).toStrictEqual(["foo", "bar"]);
+	expect(result).toStrictEqual({ data: ["foo", "bar"], errors: [] });
 });
 
 it("allows inspection of owner registered hooks", () => {

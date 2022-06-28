@@ -1,17 +1,7 @@
-import { join } from "node:path";
 import * as prismicT from "@prismicio/types";
-import * as fs from "node:fs/promises";
-
-import prettier from "prettier";
-import stripIndent from "strip-indent";
 
 import { HookSystem } from "./lib";
-import { LoadedSliceMachinePlugin } from "./defineSliceMachinePlugin";
 import { SliceMachineProject, SliceMachineHooks, SliceLibrary } from "./types";
-
-type FormatOptions = {
-	prettier?: prettier.Options;
-};
 
 type GetSliceModelArgs = {
 	libraryID: string;
@@ -31,13 +21,6 @@ type NotifyArgs = {
  * Slice Machine actions shared to plugins and hooks.
  */
 export type SliceMachineActions = {
-	getProject(): Promise<SliceMachineProject>;
-	joinPathFromRoot(...paths: string[]): string;
-	format(
-		source: string,
-		filePath?: string,
-		options?: FormatOptions,
-	): Promise<string>;
 	getSliceModel(args: GetSliceModelArgs): Promise<prismicT.SharedSliceModel>;
 	readLibrary(
 		args: ReadLibraryArgs,
@@ -53,56 +36,38 @@ export type SliceMachineActions = {
 export const createSliceMachineActions = (
 	project: SliceMachineProject,
 	hookSystem: HookSystem<SliceMachineHooks>,
-	_plugin: LoadedSliceMachinePlugin,
 ): SliceMachineActions => {
 	return {
-		getProject: async () => {
-			const configFilePath = join(project.root, "sm.json");
-			const configContents = await fs.readFile(configFilePath, "utf8");
-			const config = JSON.parse(configContents);
-
-			return {
-				...project,
-				config,
-			};
-		},
-
-		joinPathFromRoot: (...paths) => {
-			return join(project.root, ...paths);
-		},
-
-		format: async (source, filePath = project.root, options) => {
-			let formatted = stripIndent(source);
-
-			const prettierOptions = await prettier.resolveConfig(filePath);
-
-			if (prettierOptions) {
-				formatted = prettier.format(formatted, {
-					...prettierOptions,
-					...(options?.prettier ?? {}),
-				});
-			}
-
-			return formatted;
-		},
-
 		readLibrary: async (args) => {
-			const [library] = await hookSystem.callHook("library:read", {
+			const {
+				data: [library],
+				errors: [cause],
+			} = await hookSystem.callHook("library:read", {
 				libraryID: args.libraryID,
 			});
+
+			if (!library) {
+				throw new Error(`Library \`${args.libraryID}\` not found.`, {
+					cause,
+				});
+			}
 
 			return library;
 		},
 
 		getSliceModel: async (args) => {
-			const [model] = await hookSystem.callHook("slice:read", {
+			const {
+				data: [model],
+				errors: [cause],
+			} = await hookSystem.callHook("slice:read", {
 				libraryID: args.libraryID,
 				sliceID: args.sliceID,
 			});
 
 			if (!model) {
 				throw new Error(
-					`A "${args.sliceID}" Slice does not exist in the "${args.libraryID}" library.`,
+					`Slice \`${args.sliceID}\` not found in the \`${args.libraryID}\` library.`,
+					{ cause },
 				);
 			}
 

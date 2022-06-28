@@ -3,7 +3,6 @@
 //       part of the public API; it would no longer be "internal."
 import * as prismicT from "@prismicio/types";
 
-import { SliceMachineActions } from "./createSliceMachineActions";
 import { SliceMachineContext } from "./createSliceMachineContext";
 
 type Promisable<T> = T | PromiseLike<T>;
@@ -55,10 +54,7 @@ export type SliceMachineHook<TData, TReturn> = (
 
 export type SliceMachineHookExtraArgs<
 	TPluginOptions extends PluginOptions = PluginOptions,
-> = [
-	actions: SliceMachineActions,
-	context: SliceMachineContext<TPluginOptions>,
-];
+> = [context: SliceMachineContext<TPluginOptions>];
 
 export type ExtendSliceMachineHook<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

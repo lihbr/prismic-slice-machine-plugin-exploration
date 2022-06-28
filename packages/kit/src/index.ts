@@ -4,6 +4,7 @@ export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
 
 export type { SliceMachineActions } from "./createSliceMachineActions";
+export type { SliceMachineHelpers } from "./createSliceMachineHelpers";
 export type { SliceMachineContext } from "./createSliceMachineContext";
 
 export {
@@ -67,6 +68,8 @@ export type {
 	SliceSimulatorSetupStep,
 	SliceSimulatorSetupStepValidationMessage,
 } from "./types";
+
+export { HookError } from "./lib";
 
 // Internal (for Slice Machine)
 
