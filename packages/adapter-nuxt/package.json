@@ -43,11 +43,11 @@
 		"@slicemachine/plugin-kit": "^0.0.0"
 	},
 	"devDependencies": {
-		"c8": "^7.11.2",
+		"c8": "^7.11.3",
 		"siroc": "^0.16.0",
-		"standard-version": "^9.3.2",
-		"typescript": "^4.6.3",
-		"vitest": "^0.10.0"
+		"standard-version": "^9.5.0",
+		"typescript": "^4.7.4",
+		"vitest": "^0.16.0"
 	},
 	"engines": {
 		"node": ">=12.7.0"

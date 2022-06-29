@@ -285,11 +285,6 @@ export type LibraryReadHook<
 // ## slice-simulator:setup:read
 // ============================================================================
 
-// const SliceSimulatorSetupStepStatus = {
-// 	Incomplete: "Incomplete",
-// 	PartiallyComplete: "PartiallyComplete",
-// 	Complete: "Complete",
-// } as const;
 export const SliceSimulatorSetupStepValidationMessageType = {
 	Error: "Error",
 	Warning: "Warning",
