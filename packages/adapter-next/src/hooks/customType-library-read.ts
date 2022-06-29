@@ -23,8 +23,8 @@ export const customTypeLibraryRead: CustomTypeLibraryReadHook<
 
 	const ids: string[] = [];
 	await Promise.all(
-		childFiles.map(async (childDir) => {
-			const modelPath = path.join(dirPath, `${childDir}.json`);
+		childFiles.map(async (childFile) => {
+			const modelPath = path.join(dirPath, `${childFile}.json`);
 
 			try {
 				const modelContents = await readJSONFile(modelPath);
