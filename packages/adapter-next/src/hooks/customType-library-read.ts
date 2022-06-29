@@ -23,19 +23,21 @@ export const customTypeLibraryRead: CustomTypeLibraryReadHook<
 
 	const ids: string[] = [];
 	await Promise.all(
-		childFiles.map(async (childFile) => {
-			const modelPath = path.join(dirPath, `${childFile}.json`);
+		childFiles
+			.filter((childFile) => childFile.endsWith(".json"))
+			.map(async (childFile) => {
+				const modelPath = path.join(dirPath, childFile);
 
-			try {
-				const modelContents = await readJSONFile(modelPath);
+				try {
+					const modelContents = await readJSONFile(modelPath);
 
-				if (isCustomTypeModel(modelContents)) {
-					ids.push(modelContents.id);
+					if (isCustomTypeModel(modelContents)) {
+						ids.push(modelContents.id);
+					}
+				} catch {
+					// noop
 				}
-			} catch {
-				// noop
-			}
-		}),
+			}),
 	);
 
 	return {
