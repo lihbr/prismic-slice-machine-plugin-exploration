@@ -72,6 +72,7 @@ export const SliceMachineHookName = {
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
 	slice_read: "slice:read",
+	slice_customScreenshot_upsert: "slice:custom-screenshot:upsert",
 	customType_create: "custom-type:create",
 	customType_update: "custom-type:update",
 	customType_delete: "custom-type:delete",
@@ -90,6 +91,7 @@ export type SliceMachineHooks = {
 	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
 	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
 	[SliceMachineHookName.slice_read]: SliceReadHookBase;
+	[SliceMachineHookName.slice_customScreenshot_upsert]: SliceCustomScreenshotUpsertHookBase;
 
 	// Custom Types
 	[SliceMachineHookName.customType_create]: CustomTypeCreateHookBase;
@@ -156,11 +158,30 @@ export type SliceReadHookData = {
 };
 export type SliceReadHookBase = SliceMachineHook<
 	SliceReadHookData,
-	prismicT.SharedSliceModel
+	prismicT.SharedSliceModel & {
+		customScreenshotAbsolutePath?: string;
+	}
 >;
 export type SliceReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = ExtendSliceMachineHook<SliceReadHookBase, TPluginOptions>;
+
+// ============================================================================
+// ## slice:custom-screenshot:upsert
+// ============================================================================
+
+export type SliceCustomScreenshotUpsertHookData = {
+	libraryID: string;
+	sliceID: string;
+	customScreenshotAbsolutePath?: string;
+};
+export type SliceCustomScreenshotUpsertHookBase = SliceMachineHook<
+	SliceCustomScreenshotUpsertHookData,
+	void
+>;
+export type SliceCustomScreenshotUpsertHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<SliceCustomScreenshotUpsertHookBase, TPluginOptions>;
 
 // ============================================================================
 // ## custom-type:create

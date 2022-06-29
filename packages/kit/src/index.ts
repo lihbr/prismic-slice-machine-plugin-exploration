@@ -35,19 +35,23 @@ export type {
 	SliceReadHook,
 	SliceReadHookData,
 	//
-	// -- customType:create
+	// -- slice:custom-screenshot:upsert
+	SliceCustomScreenshotUpsertHook,
+	SliceCustomScreenshotUpsertHookData,
+	//
+	// -- custom-type:create
 	CustomTypeCreateHook,
 	CustomTypeCreateHookData,
 	//
-	// -- customType:update
+	// -- custom-type:update
 	CustomTypeUpdateHook,
 	CustomTypeUpdateHookData,
 	//
-	// -- customType:delete
+	// -- custom-type:delete
 	CustomTypeDeleteHook,
 	CustomTypeDeleteHookData,
 	//
-	// -- customType:read
+	// -- custom-type:read
 	CustomTypeReadHook,
 	CustomTypeReadHookData,
 	//
