@@ -162,11 +162,13 @@ export class HookSystem<
 		const hooks: RegisteredHook[] = [];
 
 		for (const hookName in this._registeredHooks) {
-			const registeredHooks = this._registeredHooks[hookName] ?? [];
+			const registeredHooks = this._registeredHooks[hookName];
 
-			for (const registeredHook of registeredHooks) {
-				if (registeredHook.meta.owner === owner) {
-					hooks.push(registeredHook);
+			if (Array.isArray(registeredHooks)) {
+				for (const registeredHook of registeredHooks) {
+					if (registeredHook.meta.owner === owner) {
+						hooks.push(registeredHook);
+					}
 				}
 			}
 		}

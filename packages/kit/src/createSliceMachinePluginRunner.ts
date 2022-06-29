@@ -14,14 +14,20 @@ import {
 	SliceMachineProject,
 } from "./types";
 
-const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
+/**
+ * @internal
+ */
+export const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
 	"slice:read",
 	"slice:library:read",
 	"custom-type:read",
 	"custom-type:library:read",
 	"slice-simulator:setup:read",
 ];
-const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
+/**
+ * @internal
+ */
+export const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
 
 /**
  * @internal
