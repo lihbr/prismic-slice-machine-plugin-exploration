@@ -10,6 +10,7 @@ export type { SliceMachineContext } from "./createSliceMachineContext";
 export {
 	SnippetReadHookDataRootModelType,
 	SliceSimulatorSetupStepValidationMessageType,
+	PrismicPushActionType,
 } from "./types";
 
 export type {
