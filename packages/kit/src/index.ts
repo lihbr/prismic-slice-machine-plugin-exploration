@@ -84,5 +84,9 @@ export { HookError } from "./lib";
 
 export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
 
-export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+export {
+	REQUIRED_ADAPTER_HOOKS,
+	ADAPTER_ONLY_HOOKS,
+	createSliceMachinePluginRunner,
+} from "./createSliceMachinePluginRunner";
 export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
