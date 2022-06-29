@@ -1,25 +1,21 @@
-import * as prismicT from "@prismicio/types";
-
 import { HookSystem } from "./lib";
-import { SliceMachineProject, SliceMachineHooks, SliceLibrary } from "./types";
-
-type GetSliceModelArgs = {
-	libraryID: string;
-	sliceID: string;
-};
-
-type ReadLibraryArgs = {
-	libraryID: string;
-};
+import {
+	SliceMachineProject,
+	SliceMachineHooks,
+	SliceReadHookBase,
+	SliceLibraryReadHookBase,
+	CustomTypeReadHookBase,
+	CustomTypeLibraryReadHookBase,
+} from "./types";
 
 /**
  * Slice Machine actions shared to plugins and hooks.
  */
 export type SliceMachineActions = {
-	getSliceModel(args: GetSliceModelArgs): Promise<prismicT.SharedSliceModel>;
-	readLibrary(
-		args: ReadLibraryArgs,
-	): Promise<SliceLibrary & { sliceIDs: string[] }>;
+	readSliceModel: SliceReadHookBase;
+	readSliceLibrary: SliceLibraryReadHookBase;
+	readCustomTypeModel: CustomTypeReadHookBase;
+	readCustomTypeLibrary: CustomTypeLibraryReadHookBase;
 };
 
 /**
@@ -32,24 +28,7 @@ export const createSliceMachineActions = (
 	hookSystem: HookSystem<SliceMachineHooks>,
 ): SliceMachineActions => {
 	return {
-		readLibrary: async (args) => {
-			const {
-				data: [library],
-				errors: [cause],
-			} = await hookSystem.callHook("library:read", {
-				libraryID: args.libraryID,
-			});
-
-			if (!library) {
-				throw new Error(`Library \`${args.libraryID}\` not found.`, {
-					cause,
-				});
-			}
-
-			return library;
-		},
-
-		getSliceModel: async (args) => {
+		readSliceModel: async (args) => {
 			const {
 				data: [model],
 				errors: [cause],
@@ -66,6 +45,53 @@ export const createSliceMachineActions = (
 			}
 
 			return model;
+		},
+
+		readSliceLibrary: async (args) => {
+			const {
+				data: [library],
+				errors: [cause],
+			} = await hookSystem.callHook("slice:library:read", {
+				libraryID: args.libraryID,
+			});
+
+			if (!library) {
+				throw new Error(`Library \`${args.libraryID}\` not found.`, {
+					cause,
+				});
+			}
+
+			return library;
+		},
+
+		readCustomTypeModel: async (args) => {
+			const {
+				data: [model],
+				errors: [cause],
+			} = await hookSystem.callHook("custom-type:read", {
+				id: args.id,
+			});
+
+			if (!model) {
+				throw new Error(`Custom Type \`${args.id}\` not found.`, { cause });
+			}
+
+			return model;
+		},
+
+		readCustomTypeLibrary: async () => {
+			const {
+				data: [library],
+				errors: [cause],
+			} = await hookSystem.callHook("custom-type:library:read");
+
+			if (!library) {
+				throw new Error(`Couldn't read Custom Type library.`, {
+					cause,
+				});
+			}
+
+			return library;
 		},
 	};
 };

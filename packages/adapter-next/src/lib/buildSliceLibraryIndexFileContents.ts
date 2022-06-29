@@ -18,7 +18,7 @@ export const buildSliceLibraryIndexFileContents = async (
 		args.libraryID,
 		args.options.typescript ? "index.ts" : "index.js",
 	);
-	const sliceLibrary = await args.actions.readLibrary({
+	const sliceLibrary = await args.actions.readSliceLibrary({
 		libraryID: args.libraryID,
 	});
 	const require = createRequire(args.project.root);

@@ -7,11 +7,12 @@ import { sliceCreate } from "./hooks/slice-create";
 import { sliceUpdate } from "./hooks/slice-update";
 import { sliceDelete } from "./hooks/slice-delete";
 import { sliceRead } from "./hooks/slice-read";
+import { sliceLibraryRead } from "./hooks/slice-library-read";
 import { customTypeCreate } from "./hooks/customType-create";
 import { customTypeDelete } from "./hooks/customType-delete";
 import { customTypeRead } from "./hooks/customType-read";
+import { customTypeLibraryRead } from "./hooks/customType-library-read";
 import { snippetRead } from "./hooks/snippet-read";
-import { libraryRead } from "./hooks/library-read";
 import { sliceSimulatorSetupRead } from "./hooks/sliceSimulator-setup-read";
 
 export default defineSliceMachinePlugin<PluginOptions>({
@@ -26,15 +27,15 @@ export default defineSliceMachinePlugin<PluginOptions>({
 		hook("slice:update", sliceUpdate);
 		hook("slice:delete", sliceDelete);
 		hook("slice:read", sliceRead);
+		hook("slice:library:read", sliceLibraryRead);
 
 		hook("custom-type:create", customTypeCreate);
 		hook("custom-type:update", customTypeCreate);
 		hook("custom-type:delete", customTypeDelete);
 		hook("custom-type:read", customTypeRead);
+		hook("custom-type:library:read", customTypeLibraryRead);
 
 		hook("snippet:read", snippetRead);
-
-		hook("library:read", libraryRead);
 
 		hook("slice-simulator:setup:read", sliceSimulatorSetupRead);
 	},

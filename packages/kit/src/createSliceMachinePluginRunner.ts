@@ -16,8 +16,9 @@ import {
 
 const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
 	"slice:read",
+	"slice:library:read",
 	"custom-type:read",
-	"library:read",
+	"custom-type:library:read",
 	"slice-simulator:setup:read",
 ];
 const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
