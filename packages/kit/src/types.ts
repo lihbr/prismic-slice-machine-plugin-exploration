@@ -340,13 +340,20 @@ export type SliceSimulatorSetupReadHook<
 // ## prismic:push
 // ============================================================================
 
+export const PrismicPushType = {
+	Create: "create",
+	Update: "update",
+	Delete: "delete",
+} as const;
 export type PrismicPushHookData = {
 	slices?: {
 		libraryID: string;
 		sliceID: string;
+		action: typeof PrismicPushType[keyof typeof PrismicPushType];
 	}[];
 	customTypes?: {
 		id: string;
+		action: typeof PrismicPushType[keyof typeof PrismicPushType];
 	}[];
 };
 export type PrismicPushHookBase = SliceMachineHook<PrismicPushHookData, void>;
