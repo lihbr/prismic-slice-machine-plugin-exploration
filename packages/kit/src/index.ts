@@ -71,6 +71,10 @@ export type {
 	SliceSimulatorSetupReadHookReturnType,
 	SliceSimulatorSetupStep,
 	SliceSimulatorSetupStepValidationMessage,
+	//
+	// -- prismic:push
+	PrismicPushHook,
+	PrismicPushHookData,
 } from "./types";
 
 export { HookError } from "./lib";

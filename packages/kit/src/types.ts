@@ -80,6 +80,7 @@ export const SliceMachineHookName = {
 	library_read: "library:read",
 	snippet_read: "snippet:read",
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
+	prismic_push: "prismic:push",
 } as const;
 
 export type SliceMachineHookNames =
@@ -107,6 +108,9 @@ export type SliceMachineHooks = {
 
 	// Slice Simulator
 	[SliceMachineHookName.sliceSimulator_setup_read]: SliceSimulatorSetupReadHookBase;
+
+	// Prismic Push
+	[SliceMachineHookName.prismic_push]: PrismicPushHookBase;
 };
 
 // ============================================================================
@@ -331,3 +335,21 @@ export type SliceSimulatorSetupReadHookBase = SliceMachineHook<
 export type SliceSimulatorSetupReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = ExtendSliceMachineHook<SliceSimulatorSetupReadHookBase, TPluginOptions>;
+
+// ============================================================================
+// ## prismic:push
+// ============================================================================
+
+export type PrismicPushHookData = {
+	slices?: {
+		libraryID: string;
+		sliceID: string;
+	}[];
+	customTypes?: {
+		id: string;
+	}[];
+};
+export type PrismicPushHookBase = SliceMachineHook<PrismicPushHookData, void>;
+export type PrismicPushHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<PrismicPushHookBase, TPluginOptions>;
