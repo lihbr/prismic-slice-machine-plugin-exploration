@@ -79,7 +79,6 @@ export const SliceMachineHookName = {
 	library_read: "library:read",
 	snippet_read: "snippet:read",
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
-	ui_notification: "ui:notification",
 } as const;
 
 export type SliceMachineHookNames =

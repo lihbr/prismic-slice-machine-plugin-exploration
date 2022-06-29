@@ -12,11 +12,6 @@ type ReadLibraryArgs = {
 	libraryID: string;
 };
 
-type NotifyArgs = {
-	type: "info" | "warn" | "error";
-	message: string;
-};
-
 /**
  * Slice Machine actions shared to plugins and hooks.
  */
@@ -25,7 +20,6 @@ export type SliceMachineActions = {
 	readLibrary(
 		args: ReadLibraryArgs,
 	): Promise<SliceLibrary & { sliceIDs: string[] }>;
-	notify(args: NotifyArgs): Promise<void>;
 };
 
 /**
@@ -72,13 +66,6 @@ export const createSliceMachineActions = (
 			}
 
 			return model;
-		},
-
-		notify: async (_args) => {
-			// Trigger an internal Slice Machine function.
-			// It doesn't necessarily need to be a hook function.
-			// If SM uses a separate hook system
-			// internally, then it could be called here.
 		},
 	};
 };
