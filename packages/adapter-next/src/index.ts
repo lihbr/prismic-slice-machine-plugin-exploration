@@ -27,13 +27,13 @@ export default defineSliceMachinePlugin<PluginOptions>({
 		hook("slice:update", sliceUpdate);
 		hook("slice:delete", sliceDelete);
 		hook("slice:read", sliceRead);
-		hook("slice:library:read", sliceLibraryRead);
+		hook("slice-library:read", sliceLibraryRead);
 
 		hook("custom-type:create", customTypeCreate);
 		hook("custom-type:update", customTypeCreate);
 		hook("custom-type:delete", customTypeDelete);
 		hook("custom-type:read", customTypeRead);
-		hook("custom-type:library:read", customTypeLibraryRead);
+		hook("custom-type-library:read", customTypeLibraryRead);
 
 		hook("snippet:read", snippetRead);
 

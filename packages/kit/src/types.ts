@@ -72,12 +72,12 @@ export const SliceMachineHookName = {
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
 	slice_read: "slice:read",
-	slice_library_read: "slice:library:read",
+	sliceLibrary_read: "slice-library:read",
 	customType_create: "custom-type:create",
 	customType_update: "custom-type:update",
 	customType_delete: "custom-type:delete",
 	customType_read: "custom-type:read",
-	customType_library_read: "custom-type:library:read",
+	customTypeLibrary_read: "custom-type-library:read",
 	snippet_read: "snippet:read",
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
 } as const;
@@ -91,14 +91,18 @@ export type SliceMachineHooks = {
 	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
 	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
 	[SliceMachineHookName.slice_read]: SliceReadHookBase;
-	[SliceMachineHookName.slice_library_read]: SliceLibraryReadHookBase;
+
+	// Slice Libraries
+	[SliceMachineHookName.sliceLibrary_read]: SliceLibraryReadHookBase;
 
 	// Custom Types
 	[SliceMachineHookName.customType_create]: CustomTypeCreateHookBase;
 	[SliceMachineHookName.customType_update]: CustomTypeUpdateHookBase;
 	[SliceMachineHookName.customType_delete]: CustomTypeDeleteHookBase;
 	[SliceMachineHookName.customType_read]: CustomTypeReadHookBase;
-	[SliceMachineHookName.customType_library_read]: CustomTypeLibraryReadHookBase;
+
+	// Custom Type Libraries
+	[SliceMachineHookName.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
 
 	// Snippets
 	[SliceMachineHookName.snippet_read]: SnippetReadHookBase;
@@ -163,7 +167,7 @@ export type SliceReadHook<
 > = ExtendSliceMachineHook<SliceReadHookBase, TPluginOptions>;
 
 // ============================================================================
-// ## slice:library:read
+// ## slice-library:read
 // ============================================================================
 
 export type SliceLibraryReadHookData = {
@@ -241,7 +245,7 @@ export type CustomTypeReadHook<
 > = ExtendSliceMachineHook<CustomTypeReadHookBase, TPluginOptions>;
 
 // ============================================================================
-// ## custom-type:library:read
+// ## custom-type-library:read
 // ============================================================================
 
 export type CustomTypeLibraryReadHookReturnType = {

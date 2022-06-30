@@ -19,25 +19,23 @@ export const customTypeLibraryRead: CustomTypeLibraryReadHook<
 > = async (_data, { helpers }) => {
 	const dirPath = helpers.joinPathFromRoot("customtypes");
 
-	const childFiles = await fs.readdir(dirPath);
+	const childDirs = await fs.readdir(dirPath);
 
 	const ids: string[] = [];
 	await Promise.all(
-		childFiles
-			.filter((childFile) => childFile.endsWith(".json"))
-			.map(async (childFile) => {
-				const modelPath = path.join(dirPath, childFile);
+		childDirs.map(async (childDir) => {
+			const modelPath = path.join(dirPath, childDir, "index.json");
 
-				try {
-					const modelContents = await readJSONFile(modelPath);
+			try {
+				const modelContents = await readJSONFile(modelPath);
 
-					if (isCustomTypeModel(modelContents)) {
-						ids.push(modelContents.id);
-					}
-				} catch {
-					// noop
+				if (isCustomTypeModel(modelContents)) {
+					ids.push(modelContents.id);
 				}
-			}),
+			} catch {
+				// noop
+			}
+		}),
 	);
 
 	return {

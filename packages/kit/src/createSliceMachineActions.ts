@@ -51,7 +51,7 @@ export const createSliceMachineActions = (
 			const {
 				data: [library],
 				errors: [cause],
-			} = await hookSystem.callHook("slice:library:read", {
+			} = await hookSystem.callHook("slice-library:read", {
 				libraryID: args.libraryID,
 			});
 
@@ -83,7 +83,7 @@ export const createSliceMachineActions = (
 			const {
 				data: [library],
 				errors: [cause],
-			} = await hookSystem.callHook("custom-type:library:read");
+			} = await hookSystem.callHook("custom-type-library:read");
 
 			if (!library) {
 				throw new Error(`Couldn't read Custom Type library.`, {
