@@ -191,7 +191,7 @@ export type SliceCustomScreenshotUpdateHookData = {
 	/**
 	 * An absolute path to the slice variation custom screenshot.
 	 */
-	customScreenshotPath?: string;
+	customScreenshotPath: string;
 };
 export type SliceCustomScreenshotUpdateHookBase = SliceMachineHook<
 	SliceCustomScreenshotUpdateHookData,
