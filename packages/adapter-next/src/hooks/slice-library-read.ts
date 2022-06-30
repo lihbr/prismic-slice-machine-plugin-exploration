@@ -1,4 +1,4 @@
-import type { LibraryReadHook } from "@slicemachine/plugin-kit";
+import type { SliceLibraryReadHook } from "@slicemachine/plugin-kit";
 import * as prismicT from "@prismicio/types";
 import * as fs from "node:fs/promises";
 import * as path from "path";
@@ -19,7 +19,7 @@ const isSharedSliceModel = (
 	);
 };
 
-export const libraryRead: LibraryReadHook<PluginOptions> = async (
+export const sliceLibraryRead: SliceLibraryReadHook<PluginOptions> = async (
 	data,
 	{ helpers },
 ) => {

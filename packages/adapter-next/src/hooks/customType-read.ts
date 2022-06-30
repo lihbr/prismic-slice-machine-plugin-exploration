@@ -9,7 +9,11 @@ export const customTypeRead: CustomTypeReadHook<PluginOptions> = async (
 	data,
 	{ helpers },
 ) => {
-	const filePath = helpers.joinPathFromRoot("customtypes", `${data.id}.json`);
+	const filePath = helpers.joinPathFromRoot(
+		"customtypes",
+		data.id,
+		"index.json",
+	);
 
 	return await readJSONFile<prismicT.CustomTypeModel>(filePath);
 };
