@@ -36,9 +36,9 @@ export type {
 	SliceReadHook,
 	SliceReadHookData,
 	//
-	// -- slice:custom-screenshot:upsert
-	SliceCustomScreenshotUpsertHook,
-	SliceCustomScreenshotUpsertHookData,
+	// -- slice:custom-screenshot:update
+	SliceCustomScreenshotUpdateHook,
+	SliceCustomScreenshotUpdateHookData,
 	//
 	// -- slice-library:read
 	SliceLibraryReadHook,

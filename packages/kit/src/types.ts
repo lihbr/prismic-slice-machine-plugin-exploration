@@ -72,7 +72,7 @@ export const SliceMachineHookName = {
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
 	slice_read: "slice:read",
-	slice_customScreenshot_upsert: "slice:custom-screenshot:upsert",
+	slice_customScreenshot_update: "slice:custom-screenshot:update",
 	sliceLibrary_read: "slice-library:read",
 	customType_create: "custom-type:create",
 	customType_update: "custom-type:update",
@@ -93,7 +93,7 @@ export type SliceMachineHooks = {
 	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
 	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
 	[SliceMachineHookName.slice_read]: SliceReadHookBase;
-	[SliceMachineHookName.slice_customScreenshot_upsert]: SliceCustomScreenshotUpsertHookBase;
+	[SliceMachineHookName.slice_customScreenshot_update]: SliceCustomScreenshotUpdateHookBase;
 
 	// Slice Libraries
 	[SliceMachineHookName.sliceLibrary_read]: SliceLibraryReadHookBase;
@@ -166,30 +166,40 @@ export type SliceReadHookData = {
 };
 export type SliceReadHookBase = SliceMachineHook<
 	SliceReadHookData,
-	prismicT.SharedSliceModel & {
-		customScreenshotAbsolutePath?: string;
-	}
+	prismicT.SharedSliceModel<
+		string,
+		prismicT.SharedSliceModelVariation & {
+			/**
+			 * An absolute path to the slice variation custom screenshot if any.
+			 */
+			customScreenshotPath?: string;
+		}
+	>
 >;
 export type SliceReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = ExtendSliceMachineHook<SliceReadHookBase, TPluginOptions>;
 
 // ============================================================================
-// ## slice:custom-screenshot:upsert
+// ## slice:custom-screenshot:update
 // ============================================================================
 
-export type SliceCustomScreenshotUpsertHookData = {
+export type SliceCustomScreenshotUpdateHookData = {
 	libraryID: string;
 	sliceID: string;
-	customScreenshotAbsolutePath?: string;
+	variationID: string;
+	/**
+	 * An absolute path to the slice variation custom screenshot.
+	 */
+	customScreenshotPath?: string;
 };
-export type SliceCustomScreenshotUpsertHookBase = SliceMachineHook<
-	SliceCustomScreenshotUpsertHookData,
+export type SliceCustomScreenshotUpdateHookBase = SliceMachineHook<
+	SliceCustomScreenshotUpdateHookData,
 	void
 >;
-export type SliceCustomScreenshotUpsertHook<
+export type SliceCustomScreenshotUpdateHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
-> = ExtendSliceMachineHook<SliceCustomScreenshotUpsertHookBase, TPluginOptions>;
+> = ExtendSliceMachineHook<SliceCustomScreenshotUpdateHookBase, TPluginOptions>;
 
 // ============================================================================
 // ## slice-library:read
