@@ -13,6 +13,7 @@ import {
 	SliceMachineHooks,
 	SliceMachineProject,
 } from "./types";
+import { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
 
 /**
  * @internal
@@ -29,30 +30,47 @@ export const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
  */
 export const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
 
+type SliceMachinePluginRunnerConstructorArgs = {
+	project: SliceMachineProject;
+	hookSystem: HookSystem<SliceMachineHooks>;
+	staticPlugins?: Record<string, SliceMachinePlugin>;
+};
+
 /**
  * @internal
  */
 export class SliceMachinePluginRunner {
 	private _project: SliceMachineProject;
 	private _hookSystem: HookSystem<SliceMachineHooks>;
+	private _staticPlugins: Record<string, SliceMachinePlugin>;
 
-	constructor(
-		project: SliceMachineProject,
-		hookSystem: HookSystem<SliceMachineHooks>,
-	) {
+	// Methods forwarded to the plugin runner's hook system.
+	callHook: HookSystem["callHook"];
+	hooksForOwner: HookSystem["hooksForOwner"];
+
+	constructor({
+		project,
+		hookSystem,
+		staticPlugins = {},
+	}: SliceMachinePluginRunnerConstructorArgs) {
 		this._project = project;
 		this._hookSystem = hookSystem;
+		this._staticPlugins = staticPlugins;
+
+		this.callHook = this._hookSystem.callHook.bind(this._hookSystem);
+		this.hooksForOwner = this._hookSystem.hooksForOwner.bind(this._hookSystem);
 	}
 
 	private async _loadPlugin(
 		pluginRegistration: SliceMachineConfigPluginRegistration,
-		plugin?: SliceMachinePlugin,
 	): Promise<LoadedSliceMachinePlugin> {
 		// Sanitize registration
 		const { resolve, options = {} } =
 			typeof pluginRegistration === "string"
 				? { resolve: pluginRegistration }
 				: pluginRegistration;
+
+		let plugin = this._staticPlugins[resolve];
 
 		if (!plugin) {
 			// Import plugin
@@ -156,12 +174,19 @@ export class SliceMachinePluginRunner {
 	}
 }
 
+type CreateSliceMachinePluginRunnerArgs = {
+	project: SliceMachineProject;
+	staticPlugins?: Record<string, SliceMachinePlugin>;
+};
+
 /**
  * @internal
  */
-export const createSliceMachinePluginRunner = (
-	project: SliceMachineProject,
-	hookSystem: HookSystem<SliceMachineHooks>,
-): SliceMachinePluginRunner => {
-	return new SliceMachinePluginRunner(project, hookSystem);
+export const createSliceMachinePluginRunner = ({
+	project,
+	staticPlugins,
+}: CreateSliceMachinePluginRunnerArgs): SliceMachinePluginRunner => {
+	const hookSystem = createSliceMachineHookSystem();
+
+	return new SliceMachinePluginRunner({ project, hookSystem, staticPlugins });
 };

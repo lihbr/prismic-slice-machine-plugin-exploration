@@ -6,6 +6,7 @@ import type {
 import * as fs from "node:fs/promises";
 
 import { buildSliceLibraryIndexFileContents } from "../lib/buildSliceLibraryIndexFileContents";
+import { pascalCase } from "../lib/pascalCase";
 
 import type { PluginOptions } from "../types";
 
@@ -14,7 +15,10 @@ type Args = {
 } & SliceMachineContext<PluginOptions>;
 
 const deleteSliceDir = async ({ data, helpers }: Args) => {
-	const dir = helpers.joinPathFromRoot(data.libraryID, data.model.id);
+	const dir = helpers.joinPathFromRoot(
+		data.libraryID,
+		pascalCase(data.model.id),
+	);
 
 	await fs.rmdir(dir);
 };
