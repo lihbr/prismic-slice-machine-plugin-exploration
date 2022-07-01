@@ -72,14 +72,14 @@ export const SliceMachineHookName = {
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
 	slice_read: "slice:read",
+	sliceLibrary_read: "slice-library:read",
 	customType_create: "custom-type:create",
 	customType_update: "custom-type:update",
 	customType_delete: "custom-type:delete",
 	customType_read: "custom-type:read",
-	library_read: "library:read",
+	customTypeLibrary_read: "custom-type-library:read",
 	snippet_read: "snippet:read",
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
-	ui_notification: "ui:notification",
 } as const;
 
 export type SliceMachineHookNames =
@@ -92,14 +92,17 @@ export type SliceMachineHooks = {
 	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
 	[SliceMachineHookName.slice_read]: SliceReadHookBase;
 
+	// Slice Libraries
+	[SliceMachineHookName.sliceLibrary_read]: SliceLibraryReadHookBase;
+
 	// Custom Types
 	[SliceMachineHookName.customType_create]: CustomTypeCreateHookBase;
 	[SliceMachineHookName.customType_update]: CustomTypeUpdateHookBase;
 	[SliceMachineHookName.customType_delete]: CustomTypeDeleteHookBase;
 	[SliceMachineHookName.customType_read]: CustomTypeReadHookBase;
 
-	// Libraries
-	[SliceMachineHookName.library_read]: LibraryReadHookBase;
+	// Custom Type Libraries
+	[SliceMachineHookName.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
 
 	// Snippets
 	[SliceMachineHookName.snippet_read]: SnippetReadHookBase;
@@ -164,6 +167,24 @@ export type SliceReadHook<
 > = ExtendSliceMachineHook<SliceReadHookBase, TPluginOptions>;
 
 // ============================================================================
+// ## slice-library:read
+// ============================================================================
+
+export type SliceLibraryReadHookData = {
+	libraryID: string;
+};
+export type SliceLibraryReadHookReturnType = SliceLibrary & {
+	sliceIDs: string[];
+};
+export type SliceLibraryReadHookBase = SliceMachineHook<
+	SliceLibraryReadHookData,
+	SliceLibraryReadHookReturnType
+>;
+export type SliceLibraryReadHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<SliceLibraryReadHookBase, TPluginOptions>;
+
+// ============================================================================
 // ## custom-type:create
 // ============================================================================
 
@@ -224,6 +245,21 @@ export type CustomTypeReadHook<
 > = ExtendSliceMachineHook<CustomTypeReadHookBase, TPluginOptions>;
 
 // ============================================================================
+// ## custom-type-library:read
+// ============================================================================
+
+export type CustomTypeLibraryReadHookReturnType = {
+	ids: string[];
+};
+export type CustomTypeLibraryReadHookBase = SliceMachineHook<
+	void,
+	CustomTypeLibraryReadHookReturnType
+>;
+export type CustomTypeLibraryReadHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<CustomTypeLibraryReadHookBase, TPluginOptions>;
+
+// ============================================================================
 // ## snippet:read
 // ============================================================================
 
@@ -264,32 +300,9 @@ export type SnippetReadHook<
 > = ExtendSliceMachineHook<SnippetReadHookBase, TPluginOptions>;
 
 // ============================================================================
-// ## library:read
-// ============================================================================
-
-export type LibraryReadHookData = {
-	libraryID: string;
-};
-export type LibraryReadHookReturnType = SliceLibrary & {
-	sliceIDs: string[];
-};
-export type LibraryReadHookBase = SliceMachineHook<
-	LibraryReadHookData,
-	LibraryReadHookReturnType
->;
-export type LibraryReadHook<
-	TPluginOptions extends PluginOptions = PluginOptions,
-> = ExtendSliceMachineHook<LibraryReadHookBase, TPluginOptions>;
-
-// ============================================================================
 // ## slice-simulator:setup:read
 // ============================================================================
 
-// const SliceSimulatorSetupStepStatus = {
-// 	Incomplete: "Incomplete",
-// 	PartiallyComplete: "PartiallyComplete",
-// 	Complete: "Complete",
-// } as const;
 export const SliceSimulatorSetupStepValidationMessageType = {
 	Error: "Error",
 	Warning: "Warning",

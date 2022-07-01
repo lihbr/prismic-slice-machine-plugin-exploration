@@ -35,6 +35,11 @@ export type {
 	SliceReadHook,
 	SliceReadHookData,
 	//
+	// -- slice:library:read
+	SliceLibraryReadHook,
+	SliceLibraryReadHookData,
+	SliceLibraryReadHookReturnType,
+	//
 	// -- customType:create
 	CustomTypeCreateHook,
 	CustomTypeCreateHookData,
@@ -51,16 +56,15 @@ export type {
 	CustomTypeReadHook,
 	CustomTypeReadHookData,
 	//
+	// -- custom-type:library:read
+	CustomTypeLibraryReadHook,
+	CustomTypeLibraryReadHookReturnType,
+	//
 	// -- snippet:read
 	SnippetReadHook,
 	SnippetReadHookData,
 	SnippetReadHookReturnType,
 	SnippetDescriptor,
-	//
-	// -- library:read
-	LibraryReadHook,
-	LibraryReadHookData,
-	LibraryReadHookReturnType,
 	//
 	// -- slice-simulator:setup:read
 	SliceSimulatorSetupReadHook,
@@ -75,5 +79,9 @@ export { HookError } from "./lib";
 
 export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
 
-export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+export {
+	REQUIRED_ADAPTER_HOOKS,
+	ADAPTER_ONLY_HOOKS,
+	createSliceMachinePluginRunner,
+} from "./createSliceMachinePluginRunner";
 export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
