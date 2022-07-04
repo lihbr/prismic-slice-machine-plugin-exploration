@@ -44,6 +44,7 @@ export type CreateScopeReturnType<
 };
 
 type RegisteredHookMeta = {
+	id: number;
 	name: string;
 	owner: string;
 	external?: HookFn;
@@ -80,6 +81,11 @@ export class HookError<TError = Error | unknown> extends Error {
 }
 
 /**
+ * Next hook ID, incremented each time a hook is registered.
+ */
+let nextHookID = 0;
+
+/**
  * @internal
  */
 export class HookSystem<
@@ -106,6 +112,7 @@ export class HookSystem<
 				...meta,
 				owner,
 				name,
+				id: nextHookID++,
 			},
 		});
 	}
@@ -120,17 +127,27 @@ export class HookSystem<
 	}
 
 	async callHook<TName extends Extract<keyof THookFns, string>>(
-		name: TName,
+		nameOrNameAndHookID: TName | { name: TName; hookID: number },
 		...args: Parameters<THookFns[TName]>
 	): Promise<{
 		data: Awaited<ReturnType<THookFns[TName]>>[];
 		errors: HookError[];
 	}> {
-		const hooks = this._registeredHooks[name] ?? [];
+		const hooks: RegisteredHook<THookFns[TName]>[] = [];
+
+		if (typeof nameOrNameAndHookID === "string") {
+			hooks.push(...(this._registeredHooks[nameOrNameAndHookID] ?? []));
+		} else {
+			hooks.push(
+				...(this._registeredHooks[nameOrNameAndHookID.name]?.filter(
+					(hook) => hook.meta.id === nameOrNameAndHookID.hookID,
+				) ?? []),
+			);
+		}
 
 		const promises = hooks.map(async (hook) => {
 			try {
-				return (await hook.fn(...args)) as ReturnType<THookFns[TName]>;
+				return await hook.fn(...args);
 			} catch (error) {
 				throw new HookError(hook.meta, error);
 			}
@@ -174,6 +191,13 @@ export class HookSystem<
 		}
 
 		return hooks;
+	}
+
+	/**
+	 * Returns list of hooks for a given name
+	 */
+	hooksForName(name: string): RegisteredHook[] {
+		return this._registeredHooks[name] ?? [];
 	}
 
 	createScope<TExtraArgs extends unknown[] = never[]>(

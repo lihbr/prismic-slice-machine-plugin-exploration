@@ -185,21 +185,20 @@ it("returns hook errors in order", async () => {
 	expect(result.errors[1].rawCause).toBe("bar");
 });
 
-it("allows inspection of owner registered hooks", () => {
+it("allows inspection of registered hooks for owner", () => {
 	const system = new HookSystem();
 
 	const { hook } = system.createScope("bar", []);
 
 	system.hook("foo", "hook1", vi.fn());
 	system.hook("foo", "hook2", vi.fn());
-	system.hook("foo", "hook3", vi.fn());
 	hook("hook1", vi.fn());
 
 	expect(
 		system
 			.hooksForOwner("foo")
 			.map((registeredHook) => registeredHook.meta.name),
-	).toStrictEqual(["hook1", "hook2", "hook3"]);
+	).toStrictEqual(["hook1", "hook2"]);
 	expect(
 		system
 			.hooksForOwner("bar")
@@ -210,4 +209,56 @@ it("allows inspection of owner registered hooks", () => {
 			.hooksForOwner("baz")
 			.map((registeredHook) => registeredHook.meta.name),
 	).toStrictEqual([]);
+});
+
+it("allows inspection of registered hooks for name", () => {
+	const system = new HookSystem();
+
+	const { hook } = system.createScope("bar", []);
+
+	system.hook("foo", "hook1", vi.fn());
+	system.hook("foo", "hook2", vi.fn());
+	hook("hook1", vi.fn());
+
+	expect(
+		system
+			.hooksForName("hook1")
+			.map((registeredHook) => registeredHook.meta.owner),
+	).toStrictEqual(["foo", "bar"]);
+	expect(
+		system
+			.hooksForName("hook2")
+			.map((registeredHook) => registeredHook.meta.owner),
+	).toStrictEqual(["foo"]);
+	expect(
+		system
+			.hooksForName("hook3")
+			.map((registeredHook) => registeredHook.meta.owner),
+	).toStrictEqual([]);
+});
+
+it("calls only hook with specified hook iD", async () => {
+	const system = new HookSystem();
+
+	const foo = vi.fn();
+	const bar = vi.fn();
+
+	system.hook("foo", "hook1", foo);
+	system.hook("bar", "hook1", bar);
+
+	const [
+		{
+			meta: { id },
+		},
+	] = system.hooksForName("hook1");
+
+	await system.callHook({ name: "hook1", hookID: id });
+
+	expect(foo).toHaveBeenCalledTimes(1);
+	expect(bar).toHaveBeenCalledTimes(0);
+
+	await system.callHook({ name: "hook2", hookID: -1 });
+
+	expect(foo).toHaveBeenCalledTimes(1);
+	expect(bar).toHaveBeenCalledTimes(0);
 });
