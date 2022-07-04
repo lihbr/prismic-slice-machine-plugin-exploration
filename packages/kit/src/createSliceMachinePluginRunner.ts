@@ -93,12 +93,12 @@ export class SliceMachinePluginRunner {
 		const hook: typeof hookSystemScope.hook =
 			as === "adapter"
 				? hookSystemScope.hook
-				: (name, hook, meta) => {
+				: (name, hook, ...args) => {
 						if (ADAPTER_ONLY_HOOKS.includes(name)) {
 							return;
 						}
 
-						return hookSystemScope.hook(name, hook, meta);
+						return hookSystemScope.hook(name, hook, ...args);
 				  };
 
 		// Run plugin setup with actions and context

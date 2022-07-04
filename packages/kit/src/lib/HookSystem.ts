@@ -29,16 +29,59 @@ type HookFnsWithExtraArgs<
 };
 
 /**
+ * Retrieves a map of hook names to hook functions from hooks.
+ */
+type HookFns<
+	THooks extends Record<
+		string,
+		HookFn | { fn: HookFn; meta: Record<string, unknown> }
+	> = Record<string, HookFn>,
+> = {
+	[key in keyof THooks]: THooks[key] extends HookFn
+		? THooks[key]
+		: THooks[key] extends { fn: HookFn }
+		? THooks[key]["fn"]
+		: never;
+};
+
+/**
+ * Retrieves a map of hook names to hook metas from hooks.
+ */
+type HookMetas<
+	THooks extends Record<
+		string,
+		HookFn | { fn: HookFn; meta: Record<string, unknown> }
+	> = Record<string, HookFn>,
+> = {
+	[key in keyof THooks]: THooks[key] extends { meta: Record<string, unknown> }
+		? THooks[key]["meta"]
+		: void;
+};
+
+/**
+ * Builds hook meta arguments after hook meta requirements.
+ */
+type HookMetaArg<TMeta extends Record<string, unknown> | void> =
+	TMeta extends void
+		? [meta?: Partial<RegisteredHookMeta>]
+		: [meta: Partial<RegisteredHookMeta> & TMeta];
+
+/**
  * Defines the return type of the {@link HookSystem.createScope} functions.
  */
 export type CreateScopeReturnType<
-	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
+	THooks extends Record<
+		string,
+		HookFn | { fn: HookFn; meta: Record<string, unknown> }
+	> = Record<string, HookFn>,
 	TExtraArgs extends unknown[] = never[],
+	THookFns extends HookFns<THooks> = HookFns<THooks>,
+	THookMetas extends HookMetas<THooks> = HookMetas<THooks>,
 > = {
 	hook: <TName extends Extract<keyof THookFns, string>>(
 		name: TName,
-		hook: WithExtraArgs<THookFns[TName], TExtraArgs>,
-		meta?: Partial<RegisteredHookMeta>,
+		hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
+		...args: HookMetaArg<THookMetas[TName]>
 	) => void;
 	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
 };
@@ -89,7 +132,12 @@ let nextHookID = 0;
  * @internal
  */
 export class HookSystem<
-	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
+	THooks extends Record<
+		string,
+		HookFn | { fn: HookFn; meta: Record<string, unknown> }
+	> = Record<string, HookFn>,
+	THookFns extends HookFns<THooks> = HookFns<THooks>,
+	THookMetas extends HookMetas<THooks> = HookMetas<THooks>,
 > {
 	private _registeredHooks: {
 		[K in keyof THookFns]?: RegisteredHook<THookFns[K]>[];
@@ -99,7 +147,7 @@ export class HookSystem<
 		owner: string,
 		name: TName,
 		hookFn: THookFns[TName],
-		meta: Partial<RegisteredHookMeta> = {},
+		...args: HookMetaArg<THookMetas[TName]>
 	): void {
 		if (!this._registeredHooks[name]) {
 			this._registeredHooks[name] = [];
@@ -109,7 +157,7 @@ export class HookSystem<
 		this._registeredHooks[name]!.push({
 			fn: hookFn,
 			meta: {
-				...meta,
+				...args[0],
 				owner,
 				name,
 				id: nextHookID++,
@@ -203,21 +251,30 @@ export class HookSystem<
 	createScope<TExtraArgs extends unknown[] = never[]>(
 		owner: string,
 		extraArgs: [...TExtraArgs],
-		meta: Partial<RegisteredHookMeta> = {},
-	): CreateScopeReturnType<THookFns, TExtraArgs> {
+		scopeMeta: Partial<RegisteredHookMeta> = {},
+	): CreateScopeReturnType<THooks, TExtraArgs, THookFns, THookMetas> {
 		return {
 			hook: <TName extends Extract<keyof THookFns, string>>(
 				name: TName,
 				hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
+				...args: HookMetaArg<THookMetas[TName]>
 			): void => {
 				const internalHook = ((...args: Parameters<THookFns[TName]>) => {
 					return hookFn(...args, ...extraArgs);
 				}) as THookFns[TName];
 
-				return this.hook(owner, name, internalHook, {
-					...meta,
+				const meta = {
+					...scopeMeta,
+					...args[0],
 					external: hookFn,
-				});
+				};
+
+				return this.hook(
+					owner,
+					name,
+					internalHook,
+					...([meta] as HookMetaArg<THookMetas[TName]>),
+				);
 			},
 			unhook: (name, hookFn) => {
 				this._registeredHooks[name] = this._registeredHooks[name]?.filter(
