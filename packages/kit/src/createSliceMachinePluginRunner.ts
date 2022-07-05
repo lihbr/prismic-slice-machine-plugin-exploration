@@ -33,7 +33,6 @@ export const ADAPTER_ONLY_HOOKS = REQUIRED_ADAPTER_HOOKS;
 type SliceMachinePluginRunnerConstructorArgs = {
 	project: SliceMachineProject;
 	hookSystem: HookSystem<SliceMachineHooks>;
-	staticPlugins?: Record<string, SliceMachinePlugin>;
 };
 
 /**
@@ -42,7 +41,6 @@ type SliceMachinePluginRunnerConstructorArgs = {
 export class SliceMachinePluginRunner {
 	private _project: SliceMachineProject;
 	private _hookSystem: HookSystem<SliceMachineHooks>;
-	private _staticPlugins: Record<string, SliceMachinePlugin>;
 
 	// Methods forwarded to the plugin runner's hook system.
 	callHook: HookSystem["callHook"];
@@ -51,11 +49,9 @@ export class SliceMachinePluginRunner {
 	constructor({
 		project,
 		hookSystem,
-		staticPlugins = {},
 	}: SliceMachinePluginRunnerConstructorArgs) {
 		this._project = project;
 		this._hookSystem = hookSystem;
-		this._staticPlugins = staticPlugins;
 
 		this.callHook = this._hookSystem.callHook.bind(this._hookSystem);
 		this.hooksForOwner = this._hookSystem.hooksForOwner.bind(this._hookSystem);
@@ -66,16 +62,18 @@ export class SliceMachinePluginRunner {
 	): Promise<LoadedSliceMachinePlugin> {
 		// Sanitize registration
 		const { resolve, options = {} } =
-			typeof pluginRegistration === "string"
-				? { resolve: pluginRegistration }
-				: pluginRegistration;
+			typeof pluginRegistration === "object" && "resolve" in pluginRegistration
+				? pluginRegistration
+				: { resolve: pluginRegistration };
 
-		let plugin = this._staticPlugins[resolve];
+		let plugin: SliceMachinePlugin;
 
-		if (!plugin) {
+		if (typeof resolve === "string") {
 			// Import plugin
 			const raw = await import(resolve);
 			plugin = raw.default || raw;
+		} else {
+			plugin = resolve;
 		}
 
 		if (!plugin) {
@@ -103,7 +101,7 @@ export class SliceMachinePluginRunner {
 		const hookSystemScope =
 			this._hookSystem.createScope<SliceMachineHookExtraArgs>(
 				// plugin.type,
-				plugin.resolve,
+				plugin.meta.name,
 				[context],
 			);
 
@@ -141,7 +139,7 @@ export class SliceMachinePluginRunner {
 	}
 
 	private _validateAdapter(adapter: LoadedSliceMachinePlugin): void {
-		const hooks = this._hookSystem.hooksForOwner(adapter.resolve);
+		const hooks = this._hookSystem.hooksForOwner(adapter.meta.name);
 		const hookNames = hooks.map((hook) => hook.meta.name);
 
 		const missingHooks = REQUIRED_ADAPTER_HOOKS.filter(
@@ -176,7 +174,6 @@ export class SliceMachinePluginRunner {
 
 type CreateSliceMachinePluginRunnerArgs = {
 	project: SliceMachineProject;
-	staticPlugins?: Record<string, SliceMachinePlugin>;
 };
 
 /**
@@ -184,9 +181,8 @@ type CreateSliceMachinePluginRunnerArgs = {
  */
 export const createSliceMachinePluginRunner = ({
 	project,
-	staticPlugins,
 }: CreateSliceMachinePluginRunnerArgs): SliceMachinePluginRunner => {
 	const hookSystem = createSliceMachineHookSystem();
 
-	return new SliceMachinePluginRunner({ project, hookSystem, staticPlugins });
+	return new SliceMachinePluginRunner({ project, hookSystem });
 };

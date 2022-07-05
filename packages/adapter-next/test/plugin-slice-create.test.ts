@@ -8,8 +8,6 @@ import * as path from "node:path";
 import { MOCK_PROJECT_ROOT } from "./lib/constants";
 import { createProject } from "./lib/createSliceMachineProject";
 
-import plugin from "../src";
-
 beforeEach(() => {
 	mockFs({
 		[MOCK_PROJECT_ROOT]: {},
@@ -29,12 +27,7 @@ test("creates a Slice component, model, and types file on Slice creation", async
 	});
 
 	const project = createProject();
-	const pluginRunner = createSliceMachinePluginRunner({
-		project,
-		staticPlugins: {
-			"@slicemachine/adapter-next": plugin,
-		},
-	});
+	const pluginRunner = createSliceMachinePluginRunner({ project });
 
 	await pluginRunner.init();
 	await pluginRunner.callHook("slice:create", { libraryID: "foo", model });
