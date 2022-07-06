@@ -4,6 +4,7 @@
 import * as prismicT from "@prismicio/types";
 
 import { SliceMachineContext } from "./createSliceMachineContext";
+import { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 
 type Promisable<T> = T | PromiseLike<T>;
 
@@ -16,8 +17,9 @@ export type SliceMachineConfigPluginRegistration<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > =
 	| string
+	| SliceMachinePlugin
 	| {
-			resolve: string;
+			resolve: string | SliceMachinePlugin;
 			options?: TPluginOptions;
 	  };
 

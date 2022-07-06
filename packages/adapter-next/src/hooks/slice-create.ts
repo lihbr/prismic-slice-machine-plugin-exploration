@@ -133,7 +133,10 @@ export const sliceCreate: SliceCreateHook<PluginOptions> = async (
 	data,
 	context,
 ) => {
-	const dir = context.helpers.joinPathFromRoot(data.libraryID, data.model.id);
+	const dir = context.helpers.joinPathFromRoot(
+		data.libraryID,
+		pascalCase(data.model.id),
+	);
 
 	await fs.mkdir(dir, { recursive: true });
 

@@ -41,7 +41,7 @@ export type SliceMachinePlugin<
 export type LoadedSliceMachinePlugin<
 	TPluginOptions extends Record<string, unknown> = Record<string, unknown>,
 > = SliceMachinePlugin<TPluginOptions> & {
-	resolve: string;
+	resolve: string | SliceMachinePlugin;
 	options: TPluginOptions;
 };
 
