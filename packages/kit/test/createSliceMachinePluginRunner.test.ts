@@ -2,7 +2,6 @@ import { it, expect, vi } from "vitest";
 
 import {
 	REQUIRED_ADAPTER_HOOKS,
-	createSliceMachineHookSystem,
 	createSliceMachinePluginRunner,
 	SliceMachineProject,
 	defineSliceMachinePlugin,
@@ -40,12 +39,11 @@ const createSliceMachineProject = (
 
 it("inits adapter", async () => {
 	const project = createSliceMachineProject();
-	const hookSystem = createSliceMachineHookSystem();
-	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem);
+	const pluginRunner = createSliceMachinePluginRunner({ project });
 
 	await expect(pluginRunner.init()).resolves.not.toThrowError();
 	expect(
-		hookSystem.hooksForOwner("valid-adapter").map((hook) => hook.meta.name),
+		pluginRunner.hooksForOwner("valid-adapter").map((hook) => hook.meta.name),
 	).toStrictEqual(REQUIRED_ADAPTER_HOOKS);
 });
 
@@ -61,8 +59,7 @@ it("throws when adapter is not valid", async (ctx) => {
 		}),
 	}));
 	const project = createSliceMachineProject(ctx.meta.name);
-	const hookSystem = createSliceMachineHookSystem();
-	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem);
+	const pluginRunner = createSliceMachinePluginRunner({ project });
 
 	await expect(pluginRunner.init()).rejects.toThrowError(
 		`Adapter \`${ctx.meta.name}\` is missing hooks:`,
@@ -75,8 +72,7 @@ it("throws when adapter or plugin could not be loaded", async (ctx) => {
 	vi.mock(ctx.meta.name, () => false);
 
 	const project = createSliceMachineProject(ctx.meta.name);
-	const hookSystem = createSliceMachineHookSystem();
-	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem);
+	const pluginRunner = createSliceMachinePluginRunner({ project });
 
 	await expect(pluginRunner.init()).rejects.toThrowError(
 		`Could not load plugin: \`${ctx.meta.name}\``,
@@ -97,11 +93,9 @@ it("throws when adapter or plugin throws on setup", async () => {
 		}),
 	}));
 	const fooProject = createSliceMachineProject("foo");
-	const fooHookSystem = createSliceMachineHookSystem();
-	const fooPluginRunner = createSliceMachinePluginRunner(
-		fooProject,
-		fooHookSystem,
-	);
+	const fooPluginRunner = createSliceMachinePluginRunner({
+		project: fooProject,
+	});
 
 	await expect(fooPluginRunner.init()).rejects.toThrowError(
 		`Plugin \`foo\` errored during setup: foo`,
@@ -120,11 +114,9 @@ it("throws when adapter or plugin throws on setup", async () => {
 		}),
 	}));
 	const barProject = createSliceMachineProject("bar");
-	const barHookSystem = createSliceMachineHookSystem();
-	const barPluginRunner = createSliceMachinePluginRunner(
-		barProject,
-		barHookSystem,
-	);
+	const barPluginRunner = createSliceMachinePluginRunner({
+		project: barProject,
+	});
 
 	await expect(barPluginRunner.init()).rejects.toThrowError(
 		`Plugin \`bar\` errored during setup: bar`,
@@ -154,14 +146,13 @@ it("prevents plugin to hook to adapter only hooks", async (ctx) => {
 	}));
 
 	const project = createSliceMachineProject(null, [ctx.meta.name]);
-	const hookSystem = createSliceMachineHookSystem();
-	const pluginRunner = createSliceMachinePluginRunner(project, hookSystem);
+	const pluginRunner = createSliceMachinePluginRunner({ project });
 
 	await pluginRunner.init();
 	expect(
-		hookSystem.hooksForOwner("valid-adapter").map((hook) => hook.meta.name),
+		pluginRunner.hooksForOwner("valid-adapter").map((hook) => hook.meta.name),
 	).toStrictEqual(REQUIRED_ADAPTER_HOOKS);
 	expect(
-		hookSystem.hooksForOwner(ctx.meta.name).map((hook) => hook.meta.name),
+		pluginRunner.hooksForOwner(ctx.meta.name).map((hook) => hook.meta.name),
 	).toStrictEqual(["slice:create"]);
 });
