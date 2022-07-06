@@ -43,8 +43,11 @@ export class SliceMachinePluginRunner {
 	private _hookSystem: HookSystem<SliceMachineHooks>;
 
 	// Methods forwarded to the plugin runner's hook system.
+	hook: HookSystem<SliceMachineHooks>["hook"];
+	unhook: HookSystem<SliceMachineHooks>["unhook"];
 	callHook: HookSystem<SliceMachineHooks>["callHook"];
 	hooksForOwner: HookSystem<SliceMachineHooks>["hooksForOwner"];
+	createScope: HookSystem<SliceMachineHooks>["createScope"];
 
 	constructor({
 		project,
@@ -53,8 +56,11 @@ export class SliceMachinePluginRunner {
 		this._project = project;
 		this._hookSystem = hookSystem;
 
+		this.hook = this._hookSystem.hook.bind(this._hookSystem);
+		this.unhook = this._hookSystem.unhook.bind(this._hookSystem);
 		this.callHook = this._hookSystem.callHook.bind(this._hookSystem);
 		this.hooksForOwner = this._hookSystem.hooksForOwner.bind(this._hookSystem);
+		this.createScope = this._hookSystem.createScope.bind(this._hookSystem);
 	}
 
 	private async _loadPlugin(
