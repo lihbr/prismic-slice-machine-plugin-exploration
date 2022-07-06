@@ -69,7 +69,7 @@ export type ExtendSliceMachineHook<
 	]
 ) => ReturnType<THook>;
 
-export const SliceMachineHookName = {
+export const SliceMachineHookType = {
 	slice_create: "slice:create",
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
@@ -84,33 +84,33 @@ export const SliceMachineHookName = {
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
 } as const;
 
-export type SliceMachineHookNames =
-	typeof SliceMachineHookName[keyof typeof SliceMachineHookName];
+export type SliceMachineHookTypes =
+	typeof SliceMachineHookType[keyof typeof SliceMachineHookType];
 
 export type SliceMachineHooks = {
 	// Slices
-	[SliceMachineHookName.slice_create]: SliceCreateHookBase;
-	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
-	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
-	[SliceMachineHookName.slice_read]: SliceReadHookBase;
+	[SliceMachineHookType.slice_create]: SliceCreateHookBase;
+	[SliceMachineHookType.slice_update]: SliceUpdateHookBase;
+	[SliceMachineHookType.slice_delete]: SliceDeleteHookBase;
+	[SliceMachineHookType.slice_read]: SliceReadHookBase;
 
 	// Slice Libraries
-	[SliceMachineHookName.sliceLibrary_read]: SliceLibraryReadHookBase;
+	[SliceMachineHookType.sliceLibrary_read]: SliceLibraryReadHookBase;
 
 	// Custom Types
-	[SliceMachineHookName.customType_create]: CustomTypeCreateHookBase;
-	[SliceMachineHookName.customType_update]: CustomTypeUpdateHookBase;
-	[SliceMachineHookName.customType_delete]: CustomTypeDeleteHookBase;
-	[SliceMachineHookName.customType_read]: CustomTypeReadHookBase;
+	[SliceMachineHookType.customType_create]: CustomTypeCreateHookBase;
+	[SliceMachineHookType.customType_update]: CustomTypeUpdateHookBase;
+	[SliceMachineHookType.customType_delete]: CustomTypeDeleteHookBase;
+	[SliceMachineHookType.customType_read]: CustomTypeReadHookBase;
 
 	// Custom Type Libraries
-	[SliceMachineHookName.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
+	[SliceMachineHookType.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
 
 	// Snippets
-	[SliceMachineHookName.snippet_read]: SnippetReadHookBase;
+	[SliceMachineHookType.snippet_read]: SnippetReadHookBase;
 
 	// Slice Simulator
-	[SliceMachineHookName.sliceSimulator_setup_read]: SliceSimulatorSetupReadHookBase;
+	[SliceMachineHookType.sliceSimulator_setup_read]: SliceSimulatorSetupReadHookBase;
 };
 
 // ============================================================================

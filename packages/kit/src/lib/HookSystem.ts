@@ -29,7 +29,7 @@ type HookFnsWithExtraArgs<
 };
 
 /**
- * Retrieves a map of hook names to hook functions from hooks.
+ * Retrieves a map of hook types to hook functions from hooks.
  */
 type HookFns<
 	THooks extends Record<
@@ -45,7 +45,7 @@ type HookFns<
 };
 
 /**
- * Retrieves a map of hook names to hook metas from hooks.
+ * Retrieves a map of hook types to hook metas from hooks.
  */
 type HookMetas<
 	THooks extends Record<
@@ -78,17 +78,17 @@ export type CreateScopeReturnType<
 	THookFns extends HookFns<THooks> = HookFns<THooks>,
 	THookMetas extends HookMetas<THooks> = HookMetas<THooks>,
 > = {
-	hook: <TName extends Extract<keyof THookFns, string>>(
-		name: TName,
-		hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
-		...args: HookMetaArg<THookMetas[TName]>
+	hook: <TType extends Extract<keyof THookFns, string>>(
+		type: TType,
+		hookFn: WithExtraArgs<THookFns[TType], TExtraArgs>,
+		...args: HookMetaArg<THookMetas[TType]>
 	) => void;
 	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
 };
 
 type RegisteredHookMeta = {
 	id: number;
-	name: string;
+	type: string;
 	owner: string;
 	external?: HookFn;
 	[key: string]: unknown;
@@ -103,14 +103,14 @@ type RegisteredHook<THookFn extends HookFn = HookFn> = {
 };
 
 export class HookError<TError = Error | unknown> extends Error {
-	hook: string;
+	type: string;
 	owner: string;
 	rawMeta: RegisteredHookMeta;
 	rawCause: TError;
 
 	constructor(meta: RegisteredHookMeta, cause: TError) {
 		super(
-			`Error in \`${meta.owner}\` during \`${meta.name}\` hook: ${
+			`Error in \`${meta.owner}\` during \`${meta.type}\` hook: ${
 				cause instanceof Error ? cause.message : String(cause)
 			}`,
 			{ cause: cause instanceof Error ? cause : undefined },
@@ -143,18 +143,18 @@ export class HookSystem<
 		[K in keyof THookFns]?: RegisteredHook<THookFns[K]>[];
 	} = {};
 
-	hook<TName extends Extract<keyof THookFns, string>>(
+	hook<TType extends Extract<keyof THookFns, string>>(
 		owner: string,
-		name: TName,
-		hookFn: THookFns[TName],
-		...args: HookMetaArg<THookMetas[TName]>
+		type: TType,
+		hookFn: THookFns[TType],
+		...args: HookMetaArg<THookMetas[TType]>
 	): void {
-		if (!this._registeredHooks[name]) {
-			this._registeredHooks[name] = [];
+		if (!this._registeredHooks[type]) {
+			this._registeredHooks[type] = [];
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		this._registeredHooks[name]!.push({
+		this._registeredHooks[type]!.push({
 			fn: hookFn,
 			meta: {
 				...args[0],
@@ -165,32 +165,38 @@ export class HookSystem<
 		});
 	}
 
-	unhook<TName extends Extract<keyof THookFns, string>>(
-		name: TName,
-		hookFn: THookFns[TName],
+	unhook<TType extends Extract<keyof THookFns, string>>(
+		type: TType,
+		hookFn: THookFns[TType],
 	): void {
-		this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+		this._registeredHooks[type] = this._registeredHooks[type]?.filter(
 			(registeredHook) => registeredHook.fn !== hookFn,
 		);
 	}
 
-	async callHook<TName extends Extract<keyof THookFns, string>>(
-		nameOrNameAndHookID: TName | { name: TName; hookID: number },
-		...args: Parameters<THookFns[TName]>
+	async callHook<TType extends Extract<keyof THookFns, string>>(
+		typeOrTypeAndHookID: TType | { type: TType; hookID: string },
+		...args: Parameters<THookFns[TType]>
 	): Promise<{
-		data: Awaited<ReturnType<THookFns[TName]>>[];
+		data: Awaited<ReturnType<THookFns[TType]>>[];
 		errors: HookError[];
 	}> {
-		const hooks: RegisteredHook<THookFns[TName]>[] = [];
+		let hooks: RegisteredHook<THookFns[TType]>[];
 
-		if (typeof nameOrNameAndHookID === "string") {
-			hooks.push(...(this._registeredHooks[nameOrNameAndHookID] ?? []));
+		if (typeof typeOrTypeAndHookID === "string") {
+			hooks = this._registeredHooks[typeOrTypeAndHookID] ?? [];
 		} else {
-			hooks.push(
-				...(this._registeredHooks[nameOrNameAndHookID.name]?.filter(
-					(hook) => hook.meta.id === nameOrNameAndHookID.hookID,
-				) ?? []),
+			const hookForID = this._registeredHooks[typeOrTypeAndHookID.type]?.find(
+				(hook) => hook.meta.id === typeOrTypeAndHookID.hookID,
 			);
+
+			if (hookForID) {
+				hooks = [hookForID];
+			} else {
+				throw new Error(
+					`Hook of type \`${typeOrTypeAndHookID.type}\` with ID \`${typeOrTypeAndHookID.hookID}\` not found.`,
+				);
+			}
 		}
 
 		const promises = hooks.map(async (hook) => {
@@ -204,7 +210,7 @@ export class HookSystem<
 		const settledPromises = await Promise.allSettled(promises);
 
 		return settledPromises.reduce<{
-			data: Awaited<ReturnType<THookFns[TName]>>[];
+			data: Awaited<ReturnType<THookFns[TType]>>[];
 			errors: HookError[];
 		}>(
 			(acc, settledPromise) => {
@@ -226,8 +232,8 @@ export class HookSystem<
 	hooksForOwner(owner: string): RegisteredHook[] {
 		const hooks: RegisteredHook[] = [];
 
-		for (const hookName in this._registeredHooks) {
-			const registeredHooks = this._registeredHooks[hookName];
+		for (const hookType in this._registeredHooks) {
+			const registeredHooks = this._registeredHooks[hookType];
 
 			if (Array.isArray(registeredHooks)) {
 				for (const registeredHook of registeredHooks) {
@@ -242,10 +248,10 @@ export class HookSystem<
 	}
 
 	/**
-	 * Returns list of hooks for a given name
+	 * Returns list of hooks for a given type
 	 */
-	hooksForName(name: string): RegisteredHook[] {
-		return this._registeredHooks[name] ?? [];
+	hooksForType(type: string): RegisteredHook[] {
+		return this._registeredHooks[type] ?? [];
 	}
 
 	createScope<TExtraArgs extends unknown[] = never[]>(
@@ -254,14 +260,14 @@ export class HookSystem<
 		scopeMeta: Partial<RegisteredHookMeta> = {},
 	): CreateScopeReturnType<THooks, TExtraArgs, THookFns, THookMetas> {
 		return {
-			hook: <TName extends Extract<keyof THookFns, string>>(
-				name: TName,
-				hookFn: WithExtraArgs<THookFns[TName], TExtraArgs>,
-				...args: HookMetaArg<THookMetas[TName]>
+			hook: <TType extends Extract<keyof THookFns, string>>(
+				type: TType,
+				hookFn: WithExtraArgs<THookFns[TType], TExtraArgs>,
+				...args: HookMetaArg<THookMetas[TType]>
 			): void => {
-				const internalHook = ((...args: Parameters<THookFns[TName]>) => {
+				const internalHook = ((...args: Parameters<THookFns[TType]>) => {
 					return hookFn(...args, ...extraArgs);
-				}) as THookFns[TName];
+				}) as THookFns[TType];
 
 				const meta = {
 					...scopeMeta,
@@ -271,13 +277,13 @@ export class HookSystem<
 
 				return this.hook(
 					owner,
-					name,
+					type,
 					internalHook,
-					...([meta] as HookMetaArg<THookMetas[TName]>),
+					...([meta] as HookMetaArg<THookMetas[TType]>),
 				);
 			},
-			unhook: (name, hookFn) => {
-				this._registeredHooks[name] = this._registeredHooks[name]?.filter(
+			unhook: (type, hookFn) => {
+				this._registeredHooks[type] = this._registeredHooks[type]?.filter(
 					(registeredHook) => registeredHook.meta.external !== hookFn,
 				);
 			},
