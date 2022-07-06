@@ -100,7 +100,6 @@ export class SliceMachinePluginRunner {
 		);
 		const hookSystemScope =
 			this._hookSystem.createScope<SliceMachineHookExtraArgs>(
-				// plugin.type,
 				plugin.meta.name,
 				[context],
 			);
@@ -127,12 +126,12 @@ export class SliceMachinePluginRunner {
 		} catch (error) {
 			if (error instanceof Error) {
 				throw new Error(
-					`Plugin \`${plugin.resolve}\` errored during setup: ${error.message}`,
+					`Plugin \`${plugin.meta.name}\` errored during setup: ${error.message}`,
 					{ cause: error },
 				);
 			} else {
 				throw new Error(
-					`Plugin \`${plugin.resolve}\` errored during setup: ${error}`,
+					`Plugin \`${plugin.meta.name}\` errored during setup: ${error}`,
 				);
 			}
 		}
@@ -148,9 +147,9 @@ export class SliceMachinePluginRunner {
 
 		if (missingHooks.length) {
 			throw new Error(
-				`Adapter \`${adapter.resolve}\` is missing hooks: \`${missingHooks.join(
-					"`, `",
-				)}\``,
+				`Adapter \`${
+					adapter.meta.name
+				}\` is missing hooks: \`${missingHooks.join("`, `")}\``,
 			);
 		}
 	}
