@@ -87,7 +87,7 @@ export type CreateScopeReturnType<
 };
 
 type RegisteredHookMeta = {
-	id: number;
+	id: string;
 	type: string;
 	owner: string;
 	external?: HookFn;
@@ -116,17 +116,17 @@ export class HookError<TError = Error | unknown> extends Error {
 			{ cause: cause instanceof Error ? cause : undefined },
 		);
 
-		this.hook = meta.name;
+		this.type = meta.type;
 		this.owner = meta.owner;
 		this.rawMeta = meta;
 		this.rawCause = cause;
 	}
 }
 
-/**
- * Next hook ID, incremented each time a hook is registered.
- */
-let nextHookID = 0;
+const uuid = (): string => {
+	return (++uuid.i).toString();
+};
+uuid.i = 0;
 
 /**
  * @internal
@@ -159,8 +159,8 @@ export class HookSystem<
 			meta: {
 				...args[0],
 				owner,
-				name,
-				id: nextHookID++,
+				type,
+				id: uuid(),
 			},
 		});
 	}
