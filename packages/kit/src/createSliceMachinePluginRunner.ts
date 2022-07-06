@@ -43,8 +43,8 @@ export class SliceMachinePluginRunner {
 	private _hookSystem: HookSystem<SliceMachineHooks>;
 
 	// Methods forwarded to the plugin runner's hook system.
-	callHook: HookSystem["callHook"];
-	hooksForOwner: HookSystem["hooksForOwner"];
+	callHook: HookSystem<SliceMachineHooks>["callHook"];
+	hooksForOwner: HookSystem<SliceMachineHooks>["hooksForOwner"];
 
 	constructor({
 		project,
