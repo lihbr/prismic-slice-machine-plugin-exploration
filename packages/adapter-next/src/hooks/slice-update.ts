@@ -7,6 +7,8 @@ import { generateTypes } from "prismic-ts-codegen";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
+import { pascalCase } from "../lib/pascalCase";
+
 import type { PluginOptions } from "../types";
 
 type Args = {
@@ -44,7 +46,10 @@ export const sliceUpdate: SliceUpdateHook<PluginOptions> = async (
 	data,
 	context,
 ) => {
-	const dir = context.helpers.joinPathFromRoot(data.libraryID, data.model.id);
+	const dir = context.helpers.joinPathFromRoot(
+		data.libraryID,
+		pascalCase(data.model.id),
+	);
 
 	await Promise.allSettled([
 		updateModelFile({ dir, data, ...context }),
