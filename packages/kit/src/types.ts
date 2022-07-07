@@ -5,6 +5,7 @@ import * as prismicT from "@prismicio/types";
 
 import { SliceMachineContext } from "./createSliceMachineContext";
 import { SliceMachinePlugin } from "./defineSliceMachinePlugin";
+import { Hook } from "./lib/HookSystem";
 
 type Promisable<T> = T | PromiseLike<T>;
 
@@ -69,7 +70,7 @@ export type ExtendSliceMachineHook<
 	]
 ) => ReturnType<THook>;
 
-export const SliceMachineHookName = {
+export const SliceMachineHookType = {
 	slice_create: "slice:create",
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
@@ -86,37 +87,35 @@ export const SliceMachineHookName = {
 	prismic_push: "prismic:push",
 } as const;
 
-export type SliceMachineHookNames =
-	typeof SliceMachineHookName[keyof typeof SliceMachineHookName];
+export type SliceMachineHookTypes =
+	typeof SliceMachineHookType[keyof typeof SliceMachineHookType];
 
 export type SliceMachineHooks = {
 	// Slices
-	[SliceMachineHookName.slice_create]: SliceCreateHookBase;
-	[SliceMachineHookName.slice_update]: SliceUpdateHookBase;
-	[SliceMachineHookName.slice_delete]: SliceDeleteHookBase;
-	[SliceMachineHookName.slice_read]: SliceReadHookBase;
-	[SliceMachineHookName.slice_customScreenshot_update]: SliceCustomScreenshotUpdateHookBase;
+	[SliceMachineHookType.slice_create]: Hook<SliceCreateHookBase>;
+	[SliceMachineHookType.slice_update]: Hook<SliceUpdateHookBase>;
+	[SliceMachineHookType.slice_delete]: Hook<SliceDeleteHookBase>;
+	[SliceMachineHookType.slice_read]: Hook<SliceReadHookBase>;
+	[SliceMachineHookType.slice_customScreenshot_update]: Hook<SliceCustomScreenshotUpdateHookBase>;
 
 	// Slice Libraries
-	[SliceMachineHookName.sliceLibrary_read]: SliceLibraryReadHookBase;
+	[SliceMachineHookType.sliceLibrary_read]: Hook<SliceLibraryReadHookBase>;
 
 	// Custom Types
-	[SliceMachineHookName.customType_create]: CustomTypeCreateHookBase;
-	[SliceMachineHookName.customType_update]: CustomTypeUpdateHookBase;
-	[SliceMachineHookName.customType_delete]: CustomTypeDeleteHookBase;
-	[SliceMachineHookName.customType_read]: CustomTypeReadHookBase;
+	[SliceMachineHookType.customType_create]: Hook<CustomTypeCreateHookBase>;
+	[SliceMachineHookType.customType_update]: Hook<CustomTypeUpdateHookBase>;
+	[SliceMachineHookType.customType_delete]: Hook<CustomTypeDeleteHookBase>;
+	[SliceMachineHookType.customType_read]: Hook<CustomTypeReadHookBase>;
 
 	// Custom Type Libraries
-	[SliceMachineHookName.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
+	[SliceMachineHookType.customTypeLibrary_read]: Hook<CustomTypeLibraryReadHookBase>;
 
 	// Snippets
-	[SliceMachineHookName.snippet_read]: SnippetReadHookBase;
+	[SliceMachineHookType.snippet_read]: Hook<SnippetReadHookBase>;
 
 	// Slice Simulator
-	[SliceMachineHookName.sliceSimulator_setup_read]: SliceSimulatorSetupReadHookBase;
-
-	// Prismic Push
-	[SliceMachineHookName.prismic_push]: PrismicPushHookBase;
+	[SliceMachineHookType.sliceSimulator_setup_read]: Hook<SliceSimulatorSetupReadHookBase>;
+	[SliceMachineHookType.prismic_push]: Hook<PrismicPushHookBase>;
 };
 
 // ============================================================================

@@ -56,7 +56,7 @@ it("allows plugin setup as adapter to hook to adapter only hooks", async () => {
 	expect(
 		pluginRunner
 			.hooksForOwner(adapter.valid.meta.name)
-			.map((hook) => hook.meta.name),
+			.map((hook) => hook.meta.type),
 	).toStrictEqual(REQUIRED_ADAPTER_HOOKS);
 });
 
@@ -75,6 +75,6 @@ it("prevents plugin setup as plugin to hook to adapter only hooks", async () => 
 	expect(
 		pluginRunner
 			.hooksForOwner(adapter.valid.meta.name)
-			.map((hook) => hook.meta.name),
+			.map((hook) => hook.meta.type),
 	).toStrictEqual([]);
 });

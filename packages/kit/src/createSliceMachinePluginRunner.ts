@@ -9,7 +9,7 @@ import {
 import {
 	SliceMachineConfigPluginRegistration,
 	SliceMachineHookExtraArgs,
-	SliceMachineHookNames,
+	SliceMachineHookTypes,
 	SliceMachineHooks,
 	SliceMachineProject,
 } from "./types";
@@ -18,7 +18,7 @@ import { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
 /**
  * @internal
  */
-export const REQUIRED_ADAPTER_HOOKS: SliceMachineHookNames[] = [
+export const REQUIRED_ADAPTER_HOOKS: SliceMachineHookTypes[] = [
 	"slice:read",
 	"slice-library:read",
 	"custom-type:read",
@@ -47,6 +47,7 @@ export class SliceMachinePluginRunner {
 	unhook: HookSystem<SliceMachineHooks>["unhook"];
 	callHook: HookSystem<SliceMachineHooks>["callHook"];
 	hooksForOwner: HookSystem<SliceMachineHooks>["hooksForOwner"];
+	hooksForType: HookSystem<SliceMachineHooks>["hooksForType"];
 	createScope: HookSystem<SliceMachineHooks>["createScope"];
 
 	constructor({
@@ -60,6 +61,7 @@ export class SliceMachinePluginRunner {
 		this.unhook = this._hookSystem.unhook.bind(this._hookSystem);
 		this.callHook = this._hookSystem.callHook.bind(this._hookSystem);
 		this.hooksForOwner = this._hookSystem.hooksForOwner.bind(this._hookSystem);
+		this.hooksForType = this._hookSystem.hooksForType.bind(this._hookSystem);
 		this.createScope = this._hookSystem.createScope.bind(this._hookSystem);
 	}
 
@@ -114,12 +116,12 @@ export class SliceMachinePluginRunner {
 		const hook: typeof hookSystemScope.hook =
 			as === "adapter"
 				? hookSystemScope.hook
-				: (name, hook, meta) => {
-						if (ADAPTER_ONLY_HOOKS.includes(name)) {
+				: (type, hook, ...args) => {
+						if (ADAPTER_ONLY_HOOKS.includes(type)) {
 							return;
 						}
 
-						return hookSystemScope.hook(name, hook, meta);
+						return hookSystemScope.hook(type, hook, ...args);
 				  };
 
 		// Run plugin setup with actions and context
@@ -145,10 +147,10 @@ export class SliceMachinePluginRunner {
 
 	private _validateAdapter(adapter: LoadedSliceMachinePlugin): void {
 		const hooks = this._hookSystem.hooksForOwner(adapter.meta.name);
-		const hookNames = hooks.map((hook) => hook.meta.name);
+		const hookTypes = hooks.map((hook) => hook.meta.type);
 
 		const missingHooks = REQUIRED_ADAPTER_HOOKS.filter(
-			(requiredHookName) => !hookNames.includes(requiredHookName),
+			(requiredHookType) => !hookTypes.includes(requiredHookType),
 		);
 
 		if (missingHooks.length) {

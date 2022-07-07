@@ -86,8 +86,6 @@ export { HookError } from "./lib";
 
 // Internal (for Slice Machine)
 
-export { createSliceMachineHookSystem } from "./createSliceMachineHookSystem";
-
 export {
 	REQUIRED_ADAPTER_HOOKS,
 	ADAPTER_ONLY_HOOKS,
