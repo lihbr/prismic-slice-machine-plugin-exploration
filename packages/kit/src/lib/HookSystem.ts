@@ -1,15 +1,7 @@
 /**
- * Defines a hook handler.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type HookFn<TArgs extends any[] = any[], TReturn = any> = (
-	...args: TArgs
-) => Promise<TReturn> | TReturn;
-
-/**
  * Extends a function arguments with extra ones.
  */
-export type WithExtraArgs<
+type FnWithExtraArgs<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	F extends (...args: any[]) => any,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,67 +11,59 @@ export type WithExtraArgs<
 ) => ReturnType<F>;
 
 /**
- * Extends hooks with extra args.
+ * Defines a hook handler.
  */
-type HookFnsWithExtraArgs<
-	THookFns extends Record<string, HookFn> = Record<string, HookFn>,
-	TExtraArgs extends unknown[] = never[],
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type HookFn<TArgs extends any[] = any[], TReturn = any> = (
+	...args: TArgs
+) => Promise<TReturn> | TReturn;
+
+/**
+ * Generic hook metadata.
+ */
+type HookMeta = Record<string, unknown>;
+
+/**
+ * Defines a hook, including its function handler and optional metadata.
+ */
+export type Hook<
+	THookFn extends HookFn = HookFn,
+	THookMeta extends HookMeta = HookMeta,
 > = {
-	[K in keyof THookFns]: WithExtraArgs<THookFns[K], TExtraArgs>;
+	fn: THookFn;
+	meta?: THookMeta;
 };
 
 /**
  * Represents a map of hook types to hook functions and metas.
  */
-type Hooks = Record<
-	string,
-	HookFn | { fn: HookFn; meta: Record<string, unknown> }
->;
-
-/**
- * Retrieves a map of hook types to hook functions from hooks.
- */
-type HookFns<THooks extends Hooks> = {
-	[key in keyof THooks]: THooks[key] extends HookFn
-		? THooks[key]
-		: THooks[key] extends { fn: HookFn }
-		? THooks[key]["fn"]
-		: never;
-};
-
-/**
- * Retrieves a map of hook types to hook metas from hooks.
- */
-type HookMetas<THooks extends Hooks> = {
-	[key in keyof THooks]: THooks[key] extends { meta: Record<string, unknown> }
-		? THooks[key]["meta"]
-		: void;
-};
+type Hooks = Record<string, Hook>;
 
 /**
  * Builds hook meta arguments after hook meta requirements.
  */
-type HookMetaArg<THookMeta extends Record<string, unknown> | void> =
-	THookMeta extends void
-		? [meta?: Partial<RegisteredHookMeta>]
-		: [meta: Partial<RegisteredHookMeta> & THookMeta];
+type HookMetaArg<THookMeta extends Record<string, unknown> | undefined> =
+	THookMeta extends Record<string, unknown>
+		? [meta: THookMeta]
+		: [meta?: never];
 
 /**
  * Defines the return type of the {@link HookSystem.createScope} functions.
  */
 export type CreateScopeReturnType<
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	THooks extends Hooks = Record<string, { fn: HookFn; meta: any }>,
+	THooks extends Hooks = Record<string, { fn: HookFn }>,
 	TExtraArgs extends unknown[] = never[],
-	THookFns extends HookFns<THooks> = HookFns<THooks>,
-	THookMetas extends HookMetas<THooks> = HookMetas<THooks>,
 > = {
-	hook: <TType extends Extract<keyof THookFns, string>>(
+	hook: <TType extends keyof THooks>(
 		type: TType,
-		hookFn: WithExtraArgs<THookFns[TType], TExtraArgs>,
-		...args: HookMetaArg<THookMetas[TType]>
+		hookFn: FnWithExtraArgs<THooks[TType]["fn"], TExtraArgs>,
+		...[meta]: HookMetaArg<THooks[TType]["meta"]>
 	) => void;
-	unhook: HookSystem<HookFnsWithExtraArgs<THookFns, TExtraArgs>>["unhook"];
+	unhook: HookSystem<{
+		[P in keyof THooks]: Omit<THooks[P], "fn"> & {
+			fn: FnWithExtraArgs<THooks[P]["fn"], TExtraArgs>;
+		};
+	}>["unhook"];
 };
 
 type RegisteredHookMeta = {
@@ -92,15 +76,11 @@ type RegisteredHookMeta = {
 /**
  * Represents a registered hook.
  */
-type RegisteredHook<
-	THookFn extends HookFn = HookFn,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	THookMeta extends Record<string, unknown> | void = any,
-> = {
-	fn: THookFn;
-	meta: THookMeta extends void
-		? RegisteredHookMeta
-		: RegisteredHookMeta & THookMeta;
+type RegisteredHook<THook extends Hook = Hook> = {
+	fn: THook["fn"];
+	meta: THook["meta"] extends Record<string, unknown>
+		? RegisteredHookMeta & THook["meta"]
+		: RegisteredHookMeta;
 };
 
 export class HookError<TError = Error | unknown> extends Error {
@@ -132,57 +112,50 @@ uuid.i = 0;
 /**
  * @internal
  */
-export class HookSystem<
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	THooks extends Hooks = Record<string, { fn: HookFn; meta: any }>,
-	THookFns extends HookFns<THooks> = HookFns<THooks>,
-	THookMetas extends HookMetas<THooks> = HookMetas<THooks>,
-> {
+export class HookSystem<THooks extends Hooks = Hooks> {
 	private _registeredHooks: {
-		[K in keyof THooks]?: RegisteredHook<THookFns[K], THookMetas[K]>[];
+		[K in keyof THooks]?: RegisteredHook<THooks[K]>[];
 	} = {};
 
-	hook<TType extends Extract<keyof THookFns, string>>(
+	hook<TType extends keyof THooks>(
 		owner: string,
 		type: TType,
-		hookFn: THookFns[TType],
-		...args: HookMetaArg<THookMetas[TType]>
+		hookFn: THooks[TType]["fn"],
+		...[meta]: HookMetaArg<THooks[TType]["meta"]>
 	): void {
 		if (!this._registeredHooks[type]) {
 			this._registeredHooks[type] = [];
 		}
 
-		const meta = {
-			...args[0],
-			owner,
-			type,
-			id: uuid(),
-		} as unknown as RegisteredHook<THookFns[TType], THookMetas[TType]>["meta"];
-
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		this._registeredHooks[type]!.push({
 			fn: hookFn,
-			meta,
-		});
+			meta: {
+				...meta,
+				owner,
+				type,
+				id: uuid(),
+			},
+		} as RegisteredHook<THooks[TType]>);
 	}
 
-	unhook<TType extends Extract<keyof THookFns, string>>(
+	unhook<TType extends keyof THooks>(
 		type: TType,
-		hookFn: THookFns[TType],
+		hookFn: THooks[TType]["fn"],
 	): void {
 		this._registeredHooks[type] = this._registeredHooks[type]?.filter(
 			(registeredHook) => registeredHook.fn !== hookFn,
 		);
 	}
 
-	async callHook<TType extends Extract<keyof THookFns, string>>(
+	async callHook<TType extends Extract<keyof THooks, string>>(
 		typeOrTypeAndHookID: TType | { type: TType; hookID: string },
-		...args: Parameters<THookFns[TType]>
+		...args: Parameters<THooks[TType]["fn"]>
 	): Promise<{
-		data: Awaited<ReturnType<THookFns[TType]>>[];
+		data: Awaited<ReturnType<THooks[TType]["fn"]>>[];
 		errors: HookError[];
 	}> {
-		let hooks: RegisteredHook<THookFns[TType]>[];
+		let hooks: RegisteredHook<THooks[TType]>[];
 
 		if (typeof typeOrTypeAndHookID === "string") {
 			hooks = this._registeredHooks[typeOrTypeAndHookID] ?? [];
@@ -211,7 +184,7 @@ export class HookSystem<
 		const settledPromises = await Promise.allSettled(promises);
 
 		return settledPromises.reduce<{
-			data: Awaited<ReturnType<THookFns[TType]>>[];
+			data: Awaited<ReturnType<THooks[TType]["fn"]>>[];
 			errors: HookError[];
 		}>(
 			(acc, settledPromise) => {
@@ -230,8 +203,8 @@ export class HookSystem<
 	/**
 	 * Returns list of hooks for a given owner
 	 */
-	hooksForOwner(owner: string): RegisteredHook[] {
-		const hooks: RegisteredHook[] = [];
+	hooksForOwner(owner: string): RegisteredHook<THooks[string]>[] {
+		const hooks: RegisteredHook<THooks[string]>[] = [];
 
 		for (const hookType in this._registeredHooks) {
 			const registeredHooks = this._registeredHooks[hookType];
@@ -251,33 +224,36 @@ export class HookSystem<
 	/**
 	 * Returns list of hooks for a given type
 	 */
-	hooksForType<TType extends Extract<keyof THookFns, string>>(
+	hooksForType<TType extends keyof THooks>(
 		type: TType,
-	): RegisteredHook<THookFns[TType], THookMetas[TType]>[] {
+	): RegisteredHook<THooks[TType]>[] {
 		return this._registeredHooks[type] ?? [];
 	}
 
 	createScope<TExtraArgs extends unknown[] = never[]>(
 		owner: string,
 		extraArgs: [...TExtraArgs],
-	): CreateScopeReturnType<THooks, TExtraArgs, THookFns, THookMetas> {
+	): CreateScopeReturnType<THooks, TExtraArgs> {
 		return {
-			hook: <TType extends Extract<keyof THookFns, string>>(
-				type: TType,
-				hookFn: WithExtraArgs<THookFns[TType], TExtraArgs>,
-				...args: HookMetaArg<THookMetas[TType]>
-			): void => {
-				const internalHook = ((...args: Parameters<THookFns[TType]>) => {
+			hook: (type, hookFn, ...[meta]) => {
+				const internalHook = ((
+					...args: Parameters<THooks[typeof type]["fn"]>
+				) => {
 					return hookFn(...args, ...extraArgs);
-				}) as THookFns[TType];
+				}) as THooks[typeof type]["fn"];
 
-				const meta = {
-					...args[0],
+				const resolvedMeta = {
+					...meta,
 					external: hookFn,
-				};
+				} as HookMetaArg<THooks[typeof type]["meta"]>[0];
 
-				// @ts-expect-error - TypeScript fails to assert rest argument.
-				return this.hook(owner, type, internalHook, meta);
+				return this.hook(
+					owner,
+					type,
+					internalHook,
+					// @ts-expect-error - TypeScript fails to assert rest argument.
+					resolvedMeta,
+				);
 			},
 			unhook: (type, hookFn) => {
 				this._registeredHooks[type] = this._registeredHooks[type]?.filter(
