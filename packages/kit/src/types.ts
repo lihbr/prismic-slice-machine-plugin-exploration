@@ -5,6 +5,7 @@ import * as prismicT from "@prismicio/types";
 
 import { SliceMachineContext } from "./createSliceMachineContext";
 import { SliceMachinePlugin } from "./defineSliceMachinePlugin";
+import { Hook } from "./lib/HookSystem";
 
 type Promisable<T> = T | PromiseLike<T>;
 
@@ -89,52 +90,28 @@ export type SliceMachineHookTypes =
 
 export type SliceMachineHooks = {
 	// Slices
-	[SliceMachineHookType.slice_create]: {
-		fn: SliceCreateHookBase;
-	};
-	[SliceMachineHookType.slice_update]: {
-		fn: SliceUpdateHookBase;
-	};
-	[SliceMachineHookType.slice_delete]: {
-		fn: SliceDeleteHookBase;
-	};
-	[SliceMachineHookType.slice_read]: {
-		fn: SliceReadHookBase;
-	};
+	[SliceMachineHookType.slice_create]: Hook<SliceCreateHookBase>;
+	[SliceMachineHookType.slice_update]: Hook<SliceUpdateHookBase>;
+	[SliceMachineHookType.slice_delete]: Hook<SliceDeleteHookBase>;
+	[SliceMachineHookType.slice_read]: Hook<SliceReadHookBase>;
 
 	// Slice Libraries
-	[SliceMachineHookType.sliceLibrary_read]: {
-		fn: SliceLibraryReadHookBase;
-	};
+	[SliceMachineHookType.sliceLibrary_read]: Hook<SliceLibraryReadHookBase>;
 
 	// Custom Types
-	[SliceMachineHookType.customType_create]: {
-		fn: CustomTypeCreateHookBase;
-	};
-	[SliceMachineHookType.customType_update]: {
-		fn: CustomTypeUpdateHookBase;
-	};
-	[SliceMachineHookType.customType_delete]: {
-		fn: CustomTypeDeleteHookBase;
-	};
-	[SliceMachineHookType.customType_read]: {
-		fn: CustomTypeReadHookBase;
-	};
+	[SliceMachineHookType.customType_create]: Hook<CustomTypeCreateHookBase>;
+	[SliceMachineHookType.customType_update]: Hook<CustomTypeUpdateHookBase>;
+	[SliceMachineHookType.customType_delete]: Hook<CustomTypeDeleteHookBase>;
+	[SliceMachineHookType.customType_read]: Hook<CustomTypeReadHookBase>;
 
 	// Custom Type Libraries
-	[SliceMachineHookType.customTypeLibrary_read]: {
-		fn: CustomTypeLibraryReadHookBase;
-	};
+	[SliceMachineHookType.customTypeLibrary_read]: Hook<CustomTypeLibraryReadHookBase>;
 
 	// Snippets
-	[SliceMachineHookType.snippet_read]: {
-		fn: SnippetReadHookBase;
-	};
+	[SliceMachineHookType.snippet_read]: Hook<SnippetReadHookBase>;
 
 	// Slice Simulator
-	[SliceMachineHookType.sliceSimulator_setup_read]: {
-		fn: SliceSimulatorSetupReadHookBase;
-	};
+	[SliceMachineHookType.sliceSimulator_setup_read]: Hook<SliceSimulatorSetupReadHookBase>;
 };
 
 // ============================================================================

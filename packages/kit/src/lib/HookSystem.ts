@@ -1,7 +1,7 @@
 /**
  * Extends a function arguments with extra ones.
  */
-export type FnWithExtraArgs<
+type FnWithExtraArgs<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	F extends (...args: any[]) => any,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,7 +26,7 @@ type HookMeta = Record<string, unknown>;
 /**
  * Defines a hook, including its function handler and optional metadata.
  */
-type Hook<
+export type Hook<
 	THookFn extends HookFn = HookFn,
 	THookMeta extends HookMeta = HookMeta,
 > = {
