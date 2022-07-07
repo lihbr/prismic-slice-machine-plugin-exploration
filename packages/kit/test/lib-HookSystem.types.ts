@@ -37,7 +37,7 @@ untypedHook("hook1", fn, { foo: "bar" });
 
 // Hook system hooks
 type Hooks = {
-	hook1: () => null;
+	hook1: { fn: () => null };
 	hook2: { fn: () => null; meta: { foo: string } };
 };
 

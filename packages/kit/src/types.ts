@@ -89,28 +89,52 @@ export type SliceMachineHookTypes =
 
 export type SliceMachineHooks = {
 	// Slices
-	[SliceMachineHookType.slice_create]: SliceCreateHookBase;
-	[SliceMachineHookType.slice_update]: SliceUpdateHookBase;
-	[SliceMachineHookType.slice_delete]: SliceDeleteHookBase;
-	[SliceMachineHookType.slice_read]: SliceReadHookBase;
+	[SliceMachineHookType.slice_create]: {
+		fn: SliceCreateHookBase;
+	};
+	[SliceMachineHookType.slice_update]: {
+		fn: SliceUpdateHookBase;
+	};
+	[SliceMachineHookType.slice_delete]: {
+		fn: SliceDeleteHookBase;
+	};
+	[SliceMachineHookType.slice_read]: {
+		fn: SliceReadHookBase;
+	};
 
 	// Slice Libraries
-	[SliceMachineHookType.sliceLibrary_read]: SliceLibraryReadHookBase;
+	[SliceMachineHookType.sliceLibrary_read]: {
+		fn: SliceLibraryReadHookBase;
+	};
 
 	// Custom Types
-	[SliceMachineHookType.customType_create]: CustomTypeCreateHookBase;
-	[SliceMachineHookType.customType_update]: CustomTypeUpdateHookBase;
-	[SliceMachineHookType.customType_delete]: CustomTypeDeleteHookBase;
-	[SliceMachineHookType.customType_read]: CustomTypeReadHookBase;
+	[SliceMachineHookType.customType_create]: {
+		fn: CustomTypeCreateHookBase;
+	};
+	[SliceMachineHookType.customType_update]: {
+		fn: CustomTypeUpdateHookBase;
+	};
+	[SliceMachineHookType.customType_delete]: {
+		fn: CustomTypeDeleteHookBase;
+	};
+	[SliceMachineHookType.customType_read]: {
+		fn: CustomTypeReadHookBase;
+	};
 
 	// Custom Type Libraries
-	[SliceMachineHookType.customTypeLibrary_read]: CustomTypeLibraryReadHookBase;
+	[SliceMachineHookType.customTypeLibrary_read]: {
+		fn: CustomTypeLibraryReadHookBase;
+	};
 
 	// Snippets
-	[SliceMachineHookType.snippet_read]: SnippetReadHookBase;
+	[SliceMachineHookType.snippet_read]: {
+		fn: SnippetReadHookBase;
+	};
 
 	// Slice Simulator
-	[SliceMachineHookType.sliceSimulator_setup_read]: SliceSimulatorSetupReadHookBase;
+	[SliceMachineHookType.sliceSimulator_setup_read]: {
+		fn: SliceSimulatorSetupReadHookBase;
+	};
 };
 
 // ============================================================================
