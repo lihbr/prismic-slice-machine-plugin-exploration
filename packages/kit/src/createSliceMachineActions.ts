@@ -56,7 +56,7 @@ export const createSliceMachineActions = (
 			});
 
 			if (!library) {
-				throw new Error(`Library \`${args.libraryID}\` not found.`, {
+				throw new Error(`Slice library \`${args.libraryID}\` not found.`, {
 					cause,
 				});
 			}
