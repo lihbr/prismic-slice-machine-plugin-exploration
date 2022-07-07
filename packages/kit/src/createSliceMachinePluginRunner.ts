@@ -47,6 +47,7 @@ export class SliceMachinePluginRunner {
 	unhook: HookSystem<SliceMachineHooks>["unhook"];
 	callHook: HookSystem<SliceMachineHooks>["callHook"];
 	hooksForOwner: HookSystem<SliceMachineHooks>["hooksForOwner"];
+	hooksForType: HookSystem<SliceMachineHooks>["hooksForType"];
 	createScope: HookSystem<SliceMachineHooks>["createScope"];
 
 	constructor({
@@ -60,6 +61,7 @@ export class SliceMachinePluginRunner {
 		this.unhook = this._hookSystem.unhook.bind(this._hookSystem);
 		this.callHook = this._hookSystem.callHook.bind(this._hookSystem);
 		this.hooksForOwner = this._hookSystem.hooksForOwner.bind(this._hookSystem);
+		this.hooksForType = this._hookSystem.hooksForType.bind(this._hookSystem);
 		this.createScope = this._hookSystem.createScope.bind(this._hookSystem);
 	}
 
