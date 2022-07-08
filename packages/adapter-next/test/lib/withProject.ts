@@ -30,9 +30,7 @@ export const withProject = async (
 			_latest: "0.0.0",
 			adapter: {
 				resolve: adapter,
-				options: {
-					format: false,
-				},
+				options: {},
 			},
 			apiEndpoint: "https://qwerty.cdn.prismic.io/api/v2",
 		},
