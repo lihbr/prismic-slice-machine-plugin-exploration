@@ -41,7 +41,7 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
-		"@prismicio/types": "^0.1.29",
+		"@prismicio/types": "^0.2.0",
 		"defu": "^6.0.0",
 		"prettier": "^2.7.1",
 		"strip-indent": "^4.0.0"
