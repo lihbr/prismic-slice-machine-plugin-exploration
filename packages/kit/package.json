@@ -1,9 +1,12 @@
 {
 	"name": "@slicemachine/plugin-kit",
 	"version": "0.0.0",
-	"description": "package_description",
+	"description": "Set of helpers to develop and run Slice Machine plugins",
 	"keywords": [
 		"typescript",
+		"helpers",
+		"utils",
+		"toolbox",
 		"prismic"
 	],
 	"repository": {
