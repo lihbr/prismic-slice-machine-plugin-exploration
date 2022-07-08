@@ -41,13 +41,13 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
-		"@prismicio/types": "^0.1.29",
+		"@prismicio/types": "^0.2.0",
 		"defu": "^6.0.0",
 		"prettier": "^2.7.1",
 		"strip-indent": "^4.0.0"
 	},
 	"devDependencies": {
-		"@prismicio/mock": "^0.0.10",
+		"@prismicio/mock": "^0.1.0",
 		"@types/prettier": "^2.6.3",
 		"c8": "^7.11.3",
 		"siroc": "^0.16.0",
