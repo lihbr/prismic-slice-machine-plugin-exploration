@@ -287,6 +287,10 @@ test("component file is formatted by default", async (ctx) => {
 });
 
 test("component file is not formatted if formatting is disabled", async (ctx) => {
+	ctx.project.config.adapter.options.format = false;
+	const pluginRunner = createSliceMachinePluginRunner({ project: ctx.project });
+	await pluginRunner.init();
+
 	// Force unusual formatting to detect that formatting did not happen.
 	await fs.writeFile(
 		path.join(ctx.project.root, ".prettierrc"),
@@ -295,7 +299,7 @@ test("component file is not formatted if formatting is disabled", async (ctx) =>
 		}),
 	);
 
-	await ctx.pluginRunner.callHook("slice:create", { libraryID: "foo", model });
+	await pluginRunner.callHook("slice:create", { libraryID: "foo", model });
 
 	const contents = await fs.readFile(
 		path.join(ctx.project.root, "foo", "BarBaz", "index.js"),
