@@ -1,7 +1,7 @@
 // Public (for plugin authors)
 
-export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
+export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 
 export type { SliceMachineActions } from "./createSliceMachineActions";
 export type { SliceMachineHelpers } from "./createSliceMachineHelpers";
@@ -38,8 +38,9 @@ export type {
 	// -- slice:read
 	SliceReadHook,
 	SliceReadHookData,
+	SliceReadHookReturnType,
 	//
-	// -- slice:library:read
+	// -- slice-library:read
 	SliceLibraryReadHook,
 	SliceLibraryReadHookData,
 	SliceLibraryReadHookReturnType,
@@ -59,8 +60,9 @@ export type {
 	// -- customType:read
 	CustomTypeReadHook,
 	CustomTypeReadHookData,
+	CustomTypeReadHookReturnType,
 	//
-	// -- custom-type:library:read
+	// -- custom-type-library:read
 	CustomTypeLibraryReadHook,
 	CustomTypeLibraryReadHookReturnType,
 	//
@@ -83,3 +85,5 @@ export { HookError } from "./lib";
 
 export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
 export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+
+export type { CallHookReturnType } from "./lib";

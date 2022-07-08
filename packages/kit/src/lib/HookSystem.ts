@@ -48,7 +48,19 @@ type HookMetaArg<THookMeta extends Record<string, unknown> | undefined> =
 		: [meta?: never];
 
 /**
+ * Defines the return type of the {@link HookSystem.callHook} functions.
+ *
+ * @internal
+ */
+export type CallHookReturnType<THookFn extends HookFn = HookFn> = Promise<{
+	data: Awaited<ReturnType<THookFn>>[];
+	errors: HookError[];
+}>;
+
+/**
  * Defines the return type of the {@link HookSystem.createScope} functions.
+ *
+ * @internal
  */
 export type CreateScopeReturnType<
 	THooks extends Hooks = Record<string, { fn: HookFn }>,
@@ -151,10 +163,7 @@ export class HookSystem<THooks extends Hooks = Hooks> {
 	async callHook<TType extends Extract<keyof THooks, string>>(
 		typeOrTypeAndHookID: TType | { type: TType; hookID: string },
 		...args: Parameters<THooks[TType]["fn"]>
-	): Promise<{
-		data: Awaited<ReturnType<THooks[TType]["fn"]>>[];
-		errors: HookError[];
-	}> {
+	): CallHookReturnType<THooks[TType]["fn"]> {
 		let hooks: RegisteredHook<THooks[TType]>[];
 
 		if (typeof typeOrTypeAndHookID === "string") {
