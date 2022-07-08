@@ -5,7 +5,7 @@ import * as prismicT from "@prismicio/types";
 
 import { SliceMachineContext } from "./createSliceMachineContext";
 import { SliceMachinePlugin } from "./defineSliceMachinePlugin";
-import { Hook } from "./lib/HookSystem";
+import { Hook } from "./lib";
 
 type Promisable<T> = T | PromiseLike<T>;
 
@@ -37,7 +37,13 @@ export type SliceMachineConfig = {
 };
 
 export type SliceMachineProject = {
+	/**
+	 * An absolute path to project root.
+	 */
 	root: string;
+	/**
+	 * Slice Machine `sm.json` content, validated.
+	 */
 	config: SliceMachineConfig;
 };
 
@@ -161,9 +167,10 @@ export type SliceReadHookData = {
 	libraryID: string;
 	sliceID: string;
 };
+export type SliceReadHookReturnType = prismicT.SharedSliceModel;
 export type SliceReadHookBase = SliceMachineHook<
 	SliceReadHookData,
-	prismicT.SharedSliceModel
+	SliceReadHookReturnType
 >;
 export type SliceReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
@@ -239,9 +246,10 @@ export type CustomTypeDeleteHook<
 export type CustomTypeReadHookData = {
 	id: string;
 };
+export type CustomTypeReadHookReturnType = prismicT.CustomTypeModel;
 export type CustomTypeReadHookBase = SliceMachineHook<
 	CustomTypeReadHookData,
-	prismicT.CustomTypeModel
+	CustomTypeReadHookReturnType
 >;
 export type CustomTypeReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,

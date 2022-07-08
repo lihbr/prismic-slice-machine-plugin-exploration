@@ -1,13 +1,14 @@
 // Public (for plugin authors)
 
-export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 export { defineSliceMachinePlugin } from "./defineSliceMachinePlugin";
+export type { SliceMachinePlugin } from "./defineSliceMachinePlugin";
 
 export type { SliceMachineActions } from "./createSliceMachineActions";
 export type { SliceMachineHelpers } from "./createSliceMachineHelpers";
 export type { SliceMachineContext } from "./createSliceMachineContext";
 
 export {
+	SliceMachineHookType,
 	SnippetReadHookDataRootModelType,
 	SliceSimulatorSetupStepValidationMessageType,
 } from "./types";
@@ -18,6 +19,9 @@ export type {
 	SliceMachineConfig,
 	SliceLibrary,
 	// Public hooks
+	//
+	// -- types
+	SliceMachineHookTypes,
 	//
 	// -- slice:create
 	SliceCreateHook,
@@ -34,8 +38,9 @@ export type {
 	// -- slice:read
 	SliceReadHook,
 	SliceReadHookData,
+	SliceReadHookReturnType,
 	//
-	// -- slice:library:read
+	// -- slice-library:read
 	SliceLibraryReadHook,
 	SliceLibraryReadHookData,
 	SliceLibraryReadHookReturnType,
@@ -55,8 +60,9 @@ export type {
 	// -- customType:read
 	CustomTypeReadHook,
 	CustomTypeReadHookData,
+	CustomTypeReadHookReturnType,
 	//
-	// -- custom-type:library:read
+	// -- custom-type-library:read
 	CustomTypeLibraryReadHook,
 	CustomTypeLibraryReadHookReturnType,
 	//
@@ -77,9 +83,7 @@ export { HookError } from "./lib";
 
 // Internal (for Slice Machine)
 
-export {
-	REQUIRED_ADAPTER_HOOKS,
-	ADAPTER_ONLY_HOOKS,
-	createSliceMachinePluginRunner,
-} from "./createSliceMachinePluginRunner";
+export { createSliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
 export type { SliceMachinePluginRunner } from "./createSliceMachinePluginRunner";
+
+export type { CallHookReturnType } from "./lib";

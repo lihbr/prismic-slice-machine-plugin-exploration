@@ -1,4 +1,5 @@
-import { defineSliceMachinePlugin, REQUIRED_ADAPTER_HOOKS } from "../../src";
+import { defineSliceMachinePlugin } from "../../src";
+import { REQUIRED_ADAPTER_HOOKS } from "../../src/createSliceMachinePluginRunner";
 
 export const valid = defineSliceMachinePlugin({
 	meta: {

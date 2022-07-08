@@ -1,2 +1,7 @@
 export { HookSystem, HookError } from "./HookSystem";
-export type { HookFn, CreateScopeReturnType } from "./HookSystem";
+export type {
+	Hook,
+	HookFn,
+	CallHookReturnType,
+	CreateScopeReturnType,
+} from "./HookSystem";

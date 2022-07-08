@@ -41,7 +41,7 @@
 	},
 	"dependencies": {
 		"@prismicio/slice-simulator-core": "^0.2.1",
-		"@slicemachine/plugin-kit": "^0.0.0",
+		"@slicemachine/plugin-kit": "^0.0.1",
 		"common-tags": "^1.8.2",
 		"pascal-case": "^3.1.2",
 		"prismic-ts-codegen": "^0.1.0"
