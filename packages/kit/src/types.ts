@@ -75,6 +75,7 @@ export const SliceMachineHookType = {
 	slice_update: "slice:update",
 	slice_delete: "slice:delete",
 	slice_read: "slice:read",
+	slice_customScreenshot_update: "slice:custom-screenshot:update",
 	sliceLibrary_read: "slice-library:read",
 	customType_create: "custom-type:create",
 	customType_update: "custom-type:update",
@@ -83,6 +84,7 @@ export const SliceMachineHookType = {
 	customTypeLibrary_read: "custom-type-library:read",
 	snippet_read: "snippet:read",
 	sliceSimulator_setup_read: "slice-simulator:setup:read",
+	prismic_push: "prismic:push",
 } as const;
 
 export type SliceMachineHookTypes =
@@ -94,6 +96,7 @@ export type SliceMachineHooks = {
 	[SliceMachineHookType.slice_update]: Hook<SliceUpdateHookBase>;
 	[SliceMachineHookType.slice_delete]: Hook<SliceDeleteHookBase>;
 	[SliceMachineHookType.slice_read]: Hook<SliceReadHookBase>;
+	[SliceMachineHookType.slice_customScreenshot_update]: Hook<SliceCustomScreenshotUpdateHookBase>;
 
 	// Slice Libraries
 	[SliceMachineHookType.sliceLibrary_read]: Hook<SliceLibraryReadHookBase>;
@@ -112,6 +115,7 @@ export type SliceMachineHooks = {
 
 	// Slice Simulator
 	[SliceMachineHookType.sliceSimulator_setup_read]: Hook<SliceSimulatorSetupReadHookBase>;
+	[SliceMachineHookType.prismic_push]: Hook<PrismicPushHookBase>;
 };
 
 // ============================================================================
@@ -163,11 +167,40 @@ export type SliceReadHookData = {
 };
 export type SliceReadHookBase = SliceMachineHook<
 	SliceReadHookData,
-	prismicT.SharedSliceModel
+	prismicT.SharedSliceModel<
+		string,
+		prismicT.SharedSliceModelVariation & {
+			/**
+			 * An absolute path to the slice variation custom screenshot if any.
+			 */
+			customScreenshotPath?: string;
+		}
+	>
 >;
 export type SliceReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = ExtendSliceMachineHook<SliceReadHookBase, TPluginOptions>;
+
+// ============================================================================
+// ## slice:custom-screenshot:update
+// ============================================================================
+
+export type SliceCustomScreenshotUpdateHookData = {
+	libraryID: string;
+	sliceID: string;
+	variationID: string;
+	/**
+	 * An absolute path to the slice variation custom screenshot.
+	 */
+	customScreenshotPath: string;
+};
+export type SliceCustomScreenshotUpdateHookBase = SliceMachineHook<
+	SliceCustomScreenshotUpdateHookData,
+	void
+>;
+export type SliceCustomScreenshotUpdateHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<SliceCustomScreenshotUpdateHookBase, TPluginOptions>;
 
 // ============================================================================
 // ## slice-library:read
@@ -332,3 +365,28 @@ export type SliceSimulatorSetupReadHookBase = SliceMachineHook<
 export type SliceSimulatorSetupReadHook<
 	TPluginOptions extends PluginOptions = PluginOptions,
 > = ExtendSliceMachineHook<SliceSimulatorSetupReadHookBase, TPluginOptions>;
+
+// ============================================================================
+// ## prismic:push
+// ============================================================================
+
+export const PrismicPushActionType = {
+	Create: "create",
+	Update: "update",
+	Delete: "delete",
+} as const;
+export type PrismicPushHookData = {
+	slices?: {
+		libraryID: string;
+		sliceID: string;
+		action: typeof PrismicPushActionType[keyof typeof PrismicPushActionType];
+	}[];
+	customTypes?: {
+		id: string;
+		action: typeof PrismicPushActionType[keyof typeof PrismicPushActionType];
+	}[];
+};
+export type PrismicPushHookBase = SliceMachineHook<PrismicPushHookData, void>;
+export type PrismicPushHook<
+	TPluginOptions extends PluginOptions = PluginOptions,
+> = ExtendSliceMachineHook<PrismicPushHookBase, TPluginOptions>;

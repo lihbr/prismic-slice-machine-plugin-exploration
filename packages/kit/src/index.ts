@@ -10,6 +10,7 @@ export type { SliceMachineContext } from "./createSliceMachineContext";
 export {
 	SnippetReadHookDataRootModelType,
 	SliceSimulatorSetupStepValidationMessageType,
+	PrismicPushActionType,
 } from "./types";
 
 export type {
@@ -35,7 +36,11 @@ export type {
 	SliceReadHook,
 	SliceReadHookData,
 	//
-	// -- slice:library:read
+	// -- slice:custom-screenshot:update
+	SliceCustomScreenshotUpdateHook,
+	SliceCustomScreenshotUpdateHookData,
+	//
+	// -- slice-library:read
 	SliceLibraryReadHook,
 	SliceLibraryReadHookData,
 	SliceLibraryReadHookReturnType,
@@ -44,19 +49,19 @@ export type {
 	CustomTypeCreateHook,
 	CustomTypeCreateHookData,
 	//
-	// -- customType:update
+	// -- custom-type:update
 	CustomTypeUpdateHook,
 	CustomTypeUpdateHookData,
 	//
-	// -- customType:delete
+	// -- custom-type:delete
 	CustomTypeDeleteHook,
 	CustomTypeDeleteHookData,
 	//
-	// -- customType:read
+	// -- custom-type:read
 	CustomTypeReadHook,
 	CustomTypeReadHookData,
 	//
-	// -- custom-type:library:read
+	// -- custom-type-library:read
 	CustomTypeLibraryReadHook,
 	CustomTypeLibraryReadHookReturnType,
 	//
@@ -71,6 +76,10 @@ export type {
 	SliceSimulatorSetupReadHookReturnType,
 	SliceSimulatorSetupStep,
 	SliceSimulatorSetupStepValidationMessage,
+	//
+	// -- prismic:push
+	PrismicPushHook,
+	PrismicPushHookData,
 } from "./types";
 
 export { HookError } from "./lib";
