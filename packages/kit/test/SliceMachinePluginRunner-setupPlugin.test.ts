@@ -4,7 +4,8 @@ import * as adapter from "./__fixtures__/adapter";
 import * as plugin from "./__fixtures__/plugin";
 import { createSliceMachineProject } from "./__testutils__/createSliceMachineProject";
 
-import { createSliceMachinePluginRunner, REQUIRED_ADAPTER_HOOKS } from "../src";
+import { createSliceMachinePluginRunner } from "../src";
+import { REQUIRED_ADAPTER_HOOKS } from "../src/createSliceMachinePluginRunner";
 
 const project = createSliceMachineProject(adapter.valid);
 const pluginRunner = createSliceMachinePluginRunner({ project });
