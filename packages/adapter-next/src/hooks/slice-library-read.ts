@@ -5,7 +5,7 @@ import * as path from "path";
 
 import { readJSONFile } from "../lib/readJSONFile";
 
-import type { PluginOptions, SliceLibraryMetadata } from "../types";
+import type { PluginOptions } from "../types";
 
 const isSharedSliceModel = (
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,15 +24,6 @@ export const sliceLibraryRead: SliceLibraryReadHook<PluginOptions> = async (
 	{ helpers },
 ) => {
 	const dirPath = helpers.joinPathFromRoot(data.libraryID);
-
-	let metadata: SliceLibraryMetadata = {};
-	try {
-		metadata = await readJSONFile<SliceLibraryMetadata>(
-			path.join(dirPath, "library.json"),
-		);
-	} catch {
-		// noop
-	}
 
 	const childDirs = await fs.readdir(dirPath);
 
@@ -55,7 +46,6 @@ export const sliceLibraryRead: SliceLibraryReadHook<PluginOptions> = async (
 
 	return {
 		id: data.libraryID,
-		name: metadata.name,
-		sliceIDs,
+		sliceIDs: sliceIDs.sort(),
 	};
 };

@@ -24,7 +24,7 @@ export type SliceMachineActions = {
  * @internal
  */
 export const createSliceMachineActions = (
-	project: SliceMachineProject,
+	_project: SliceMachineProject,
 	hookSystem: HookSystem<SliceMachineHooks>,
 ): SliceMachineActions => {
 	return {
@@ -83,7 +83,7 @@ export const createSliceMachineActions = (
 			const {
 				data: [library],
 				errors: [cause],
-			} = await hookSystem.callHook("custom-type-library:read");
+			} = await hookSystem.callHook("custom-type-library:read", {});
 
 			if (!library) {
 				throw new Error(`Couldn't read Custom Type library.`, {

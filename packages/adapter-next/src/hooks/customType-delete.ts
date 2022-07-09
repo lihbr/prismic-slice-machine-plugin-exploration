@@ -9,5 +9,5 @@ export const customTypeDelete: CustomTypeDeleteHook<PluginOptions> = async (
 ) => {
 	const dir = helpers.joinPathFromRoot("customtypes", data.model.id);
 
-	await fs.rmdir(dir);
+	await fs.rm(dir, { recursive: true });
 };

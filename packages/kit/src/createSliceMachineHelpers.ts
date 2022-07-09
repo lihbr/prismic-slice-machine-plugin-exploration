@@ -43,17 +43,18 @@ export const createSliceMachineHelpers = (
 			};
 		},
 
-		format: async (source, filePath = project.root, options) => {
+		format: async (source, filePath, options) => {
 			let formatted = stripIndent(source);
 
-			const prettierOptions = await prettier.resolveConfig(filePath);
+			const prettierOptions = await prettier.resolveConfig(
+				filePath || project.root,
+			);
 
-			if (prettierOptions) {
-				formatted = prettier.format(formatted, {
-					...prettierOptions,
-					...(options?.prettier ?? {}),
-				});
-			}
+			formatted = prettier.format(formatted, {
+				...prettierOptions,
+				filepath: filePath,
+				...(options?.prettier ?? {}),
+			});
 
 			return formatted;
 		},

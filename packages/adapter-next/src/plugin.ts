@@ -9,6 +9,7 @@ import { sliceDelete } from "./hooks/slice-delete";
 import { sliceRead } from "./hooks/slice-read";
 import { sliceLibraryRead } from "./hooks/slice-library-read";
 import { customTypeCreate } from "./hooks/customType-create";
+import { customTypeUpdate } from "./hooks/customType-update";
 import { customTypeDelete } from "./hooks/customType-delete";
 import { customTypeRead } from "./hooks/customType-read";
 import { customTypeLibraryRead } from "./hooks/customType-library-read";
@@ -30,7 +31,7 @@ export const plugin = defineSliceMachinePlugin<PluginOptions>({
 		hook("slice-library:read", sliceLibraryRead);
 
 		hook("custom-type:create", customTypeCreate);
-		hook("custom-type:update", customTypeCreate);
+		hook("custom-type:update", customTypeUpdate);
 		hook("custom-type:delete", customTypeDelete);
 		hook("custom-type:read", customTypeRead);
 		hook("custom-type-library:read", customTypeLibraryRead);
