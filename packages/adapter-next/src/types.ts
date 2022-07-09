@@ -10,7 +10,3 @@ export type PluginOptions = {
 			jsxExtension?: never;
 	  }
 );
-
-export type SliceLibraryMetadata = {
-	name?: string;
-};

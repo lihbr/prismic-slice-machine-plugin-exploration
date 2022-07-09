@@ -26,19 +26,15 @@ export const customTypeLibraryRead: CustomTypeLibraryReadHook<
 		childDirs.map(async (childDir) => {
 			const modelPath = path.join(dirPath, childDir, "index.json");
 
-			try {
-				const modelContents = await readJSONFile(modelPath);
+			const modelContents = await readJSONFile(modelPath);
 
-				if (isCustomTypeModel(modelContents)) {
-					ids.push(modelContents.id);
-				}
-			} catch {
-				// noop
+			if (isCustomTypeModel(modelContents)) {
+				ids.push(modelContents.id);
 			}
 		}),
 	);
 
 	return {
-		ids,
+		ids: ids.sort(),
 	};
 };

@@ -105,11 +105,10 @@ test("model.json is not formatted if formatting is disabled", async (ctx) => {
 	await pluginRunner.init();
 
 	// Force unusual formatting to detect that formatting did not happen.
+	const prettierOptions = { printWidth: 10 };
 	await fs.writeFile(
 		path.join(ctx.project.root, ".prettierrc"),
-		JSON.stringify({
-			printWidth: 10,
-		}),
+		JSON.stringify(prettierOptions),
 	);
 
 	await pluginRunner.callHook("slice:create", { libraryID: "foo", model });
@@ -119,7 +118,12 @@ test("model.json is not formatted if formatting is disabled", async (ctx) => {
 		"utf8",
 	);
 
-	expect(contents).not.toBe(prettier.format(contents, { parser: "json" }));
+	expect(contents).not.toBe(
+		prettier.format(contents, {
+			...prettierOptions,
+			parser: "json",
+		}),
+	);
 });
 
 test("types.ts contains TypeScript types for the model", async (ctx) => {
@@ -161,11 +165,10 @@ test("types.ts is not formatted if formatting is disabled", async (ctx) => {
 	await pluginRunner.init();
 
 	// Force unusual formatting to detect that formatting did not happen.
+	const prettierOptions = { printWidth: 10 };
 	await fs.writeFile(
 		path.join(ctx.project.root, ".prettierrc"),
-		JSON.stringify({
-			printWidth: 10,
-		}),
+		JSON.stringify(prettierOptions),
 	);
 
 	await pluginRunner.callHook("slice:create", { libraryID: "foo", model });
@@ -177,6 +180,7 @@ test("types.ts is not formatted if formatting is disabled", async (ctx) => {
 
 	expect(contents).not.toBe(
 		prettier.format(generateTypes({ sharedSliceModels: [model] }), {
+			...prettierOptions,
 			parser: "typescript",
 		}),
 	);
@@ -292,11 +296,10 @@ test("component file is not formatted if formatting is disabled", async (ctx) =>
 	await pluginRunner.init();
 
 	// Force unusual formatting to detect that formatting did not happen.
+	const prettierOptions = { printWidth: 10 };
 	await fs.writeFile(
 		path.join(ctx.project.root, ".prettierrc"),
-		JSON.stringify({
-			printWidth: 10,
-		}),
+		JSON.stringify(prettierOptions),
 	);
 
 	await pluginRunner.callHook("slice:create", { libraryID: "foo", model });
@@ -307,6 +310,9 @@ test("component file is not formatted if formatting is disabled", async (ctx) =>
 	);
 
 	expect(contents).not.toBe(
-		prettier.format(contents, { parser: "typescript" }),
+		prettier.format(contents, {
+			...prettierOptions,
+			parser: "typescript",
+		}),
 	);
 });
