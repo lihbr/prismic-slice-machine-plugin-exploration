@@ -23,7 +23,7 @@ it("returns slice model", async () => {
 	);
 
 	expect(await readCustomTypeLibrary({})).toBe("baz");
-	expect(spy).toHaveBeenCalledWith("custom-type-library:read");
+	expect(spy).toHaveBeenCalledWith("custom-type-library:read", {});
 
 	vi.resetAllMocks();
 });
@@ -45,7 +45,7 @@ it("throws when no slice model is returned", async () => {
 	).rejects.toThrowErrorMatchingInlineSnapshot(
 		'"Couldn\'t read Custom Type library."',
 	);
-	expect(spy).toHaveBeenCalledWith("custom-type-library:read");
+	expect(spy).toHaveBeenCalledWith("custom-type-library:read", {});
 
 	vi.resetAllMocks();
 });
