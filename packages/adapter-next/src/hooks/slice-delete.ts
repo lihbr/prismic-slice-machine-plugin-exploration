@@ -20,7 +20,7 @@ const deleteSliceDir = async ({ data, helpers }: Args) => {
 		pascalCase(data.model.id),
 	);
 
-	await fs.rmdir(dir, { recursive: true });
+	await fs.rm(dir, { recursive: true });
 };
 
 const updateSliceLibraryIndexFile = async ({
