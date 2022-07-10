@@ -1,3 +1,11 @@
+> **🚨 Development has moved! 📣**
+>
+> We had great fun exploring different patterns on this repository, but now things are getting serious and code has moved to official repositories:
+>
+> - [`@slicemachine/plugin-kit`](https://github.com/prismicio/slicemachine-plugin-kit)
+> - [`@slicemachine/adapter-next`](https://github.com/prismicio/slicemachine-adapter-next)
+> - [`@slicemachine/adapter-nuxt`](https://github.com/prismicio/slicemachine-adapter-nuxt)
+
 <!--
 
 TODO: Go through all "TODO" comments in the project
