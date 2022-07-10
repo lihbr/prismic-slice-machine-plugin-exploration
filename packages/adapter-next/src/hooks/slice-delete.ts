@@ -20,7 +20,7 @@ const deleteSliceDir = async ({ data, helpers }: Args) => {
 		pascalCase(data.model.id),
 	);
 
-	await fs.rmdir(dir);
+	await fs.rm(dir, { recursive: true });
 };
 
 const updateSliceLibraryIndexFile = async ({
@@ -45,8 +45,6 @@ export const sliceDelete: SliceDeleteHook<PluginOptions> = async (
 	data,
 	context,
 ) => {
-	await Promise.allSettled([
-		deleteSliceDir({ data, ...context }),
-		updateSliceLibraryIndexFile({ data, ...context }),
-	]);
+	await deleteSliceDir({ data, ...context });
+	await updateSliceLibraryIndexFile({ data, ...context });
 };

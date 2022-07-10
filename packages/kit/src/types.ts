@@ -263,7 +263,7 @@ export type CustomTypeLibraryReadHookReturnType = {
 	ids: string[];
 };
 export type CustomTypeLibraryReadHookBase = SliceMachineHook<
-	void,
+	Record<string, never>,
 	CustomTypeLibraryReadHookReturnType
 >;
 export type CustomTypeLibraryReadHook<
@@ -280,7 +280,6 @@ export const SnippetReadHookDataRootModelType = {
 } as const;
 export type SnippetReadHookData = {
 	fieldPath: string[];
-	sliceLibrary: SliceLibrary;
 } & (
 	| {
 			rootModelType: typeof SnippetReadHookDataRootModelType.Slice;

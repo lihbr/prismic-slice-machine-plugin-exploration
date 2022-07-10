@@ -40,7 +40,7 @@
 		"unit:watch": "vitest watch"
 	},
 	"dependencies": {
-		"@slicemachine/plugin-kit": "^0.0.0"
+		"@slicemachine/plugin-kit": "^0.0.1"
 	},
 	"devDependencies": {
 		"c8": "^7.11.3",

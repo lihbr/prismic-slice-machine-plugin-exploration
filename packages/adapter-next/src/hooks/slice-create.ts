@@ -46,7 +46,7 @@ const createComponentFile = async ({ dir, data, helpers, options }: Args) => {
 			/**
 			 * Props for \`${pascalID}\`.
 			 */
-			type ${pascalID}Props = SliceComponentProps<${pascalID}Slice>;
+			export type ${pascalID}Props = SliceComponentProps<${pascalID}Slice>;
 
 			/**
 			 * Component for "${model.name}" Slices.
@@ -68,11 +68,7 @@ const createComponentFile = async ({ dir, data, helpers, options }: Args) => {
 		contents = stripIndent`
 			/**
 			 * @typedef {import("./types").${pascalID}Slice} ${pascalID}Slice
-			 *
 			 * @typedef {import("@prismicio/react").SliceComponentProps<${pascalID}Slice>} ${pascalID}Props
-			 */
-
-			/**
 			 * @param {${pascalID}Props}
 			 */
 			const ${pascalID} = ({ slice }) => {
@@ -144,6 +140,7 @@ export const sliceCreate: SliceCreateHook<PluginOptions> = async (
 		createModelFile({ dir, data, ...context }),
 		createComponentFile({ dir, data, ...context }),
 		createTypesFile({ dir, data, ...context }),
-		upsertSliceLibraryIndexFile({ data, ...context }),
 	]);
+
+	await upsertSliceLibraryIndexFile({ data, ...context });
 };
